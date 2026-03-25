@@ -6,6 +6,8 @@ import numpy as np
 from scipy.linalg import logm
 import warnings
 
+from mpemba_refactored.liouvillian import density_diagonal_indices
+
 
 def project_rho_on_modes(rho_initial: np.ndarray, left_vecs: np.ndarray, right_vecs: np.ndarray) -> np.ndarray:
     """Compute modal coefficients c_k using biorthogonal projection with `np.vdot`."""
@@ -52,6 +54,8 @@ def calculate_distance_metric(rho: np.ndarray) -> float:
         return float(np.log(size_n))
 
     with warnings.catch_warnings():
+        # Legacy scripts suppress UserWarning emitted by scipy.linalg.logm for
+        # nearly singular density matrices; we keep the same numerical behavior.
         warnings.simplefilter("ignore", UserWarning)
         log_rho = logm(rho)
 
@@ -67,7 +71,6 @@ def calculate_excitability_map_dense(left_vecs: np.ndarray, right_vecs: np.ndarr
     if np.isclose(norm_factor, 0):
         return np.zeros(size_n)
 
-    diag_indices = np.arange(size_n) * (size_n + 1)
-    projections = w_k[diag_indices].conj()
+    diag_indices = density_diagonal_indices(size_n)
+    projections = w_k.conj()[diag_indices]
     return np.abs(projections / norm_factor) ** 2
-

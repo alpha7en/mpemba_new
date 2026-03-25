@@ -31,18 +31,19 @@ def single_run(p_value, run_idx, height, width, coupling_j, gamma, num_modes_to_
 if __name__ == "__main__":
     HEIGHT = 10
     WIDTH = 10
-    J = 1.0
+    j = 1.0
     gamma = 0.1
     NUM_MODES_TO_FIND = 4
 
     p_values = np.logspace(-4, 0, num=40)
     num_runs_per_p = 30
 
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
     output_filename = f"rewiring_spectrum_data_{HEIGHT}x{WIDTH}_{timestamp}.npz"
     data_to_save = {}
 
     num_cores = os.cpu_count() or 1
+    # Keep one half of logical cores to avoid overloading shared environments.
     max_workers = max(1, num_cores // 2)
 
     total_runs = len(p_values) * num_runs_per_p
@@ -53,7 +54,7 @@ if __name__ == "__main__":
         futures = []
         for p in p_values:
             for run_idx in range(num_runs_per_p):
-                futures.append(executor.submit(single_run, p, run_idx, HEIGHT, WIDTH, J, gamma, NUM_MODES_TO_FIND))
+                futures.append(executor.submit(single_run, p, run_idx, HEIGHT, WIDTH, j, gamma, NUM_MODES_TO_FIND))
 
         for future in concurrent.futures.as_completed(futures):
             data_to_save.update(future.result())
@@ -73,4 +74,3 @@ if __name__ == "__main__":
         print(f"Saved: {os.path.abspath(output_filename)}")
     else:
         print("No data saved.")
-

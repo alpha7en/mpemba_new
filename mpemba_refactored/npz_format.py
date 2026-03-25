@@ -18,4 +18,3 @@ def pack_run_result(p_value: float, run_idx: int, lambdas: np.ndarray, vectors: 
         f"{prefix}_vectors": vectors,
         f"{prefix}_p_value": p_value,
     }
-

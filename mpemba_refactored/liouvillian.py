@@ -10,6 +10,11 @@ import numpy as np
 from scipy.sparse import csc_matrix, diags, identity, kron
 
 
+def density_diagonal_indices(size_n: int) -> np.ndarray:
+    """Indices of vec(rho_ii) under square-matrix vectorization."""
+    return np.arange(size_n) * (size_n + 1)
+
+
 def _dephasing_diagonal(size_n: int, gamma: float) -> np.ndarray:
     """Return diagonal entries for pure dephasing superoperator.
 
@@ -17,7 +22,7 @@ def _dephasing_diagonal(size_n: int, gamma: float) -> np.ndarray:
     `i*(N+1)` in both C/F vectorization, and must have zero decay.
     """
     diag_ld = np.full(size_n * size_n, -gamma, dtype=np.complex128)
-    diag_ld[np.arange(size_n) * (size_n + 1)] = 0.0
+    diag_ld[density_diagonal_indices(size_n)] = 0.0
     return diag_ld
 
 
@@ -40,4 +45,3 @@ def build_liouvillian_sparse(tau: np.ndarray, coupling_j: complex, gamma: float)
     coherent_part = -1j * (kron(identity_n, hamiltonian_sparse) - kron(hamiltonian_sparse.T, identity_n))
     dissipative_part = diags(_dephasing_diagonal(size_n, gamma), 0, format="csc")
     return (coherent_part + dissipative_part).asformat("csc")
-

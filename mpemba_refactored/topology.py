@@ -37,7 +37,11 @@ def check_connectivity(tau: np.ndarray) -> bool:
 
 
 def generate_grid_tau(height: int, width: int) -> np.ndarray:
-    """Construct the base symmetric adjacency matrix for an `height x width` grid."""
+    """Construct base symmetric adjacency for a rectangular nearest-neighbor lattice.
+
+    The matrix is binary: `tau[i, j] = 1` means an undirected edge exists between
+    nodes `i` and `j`, with horizontal and vertical links on the 2D grid only.
+    """
     total_nodes = height * width
     tau = np.zeros((total_nodes, total_nodes), dtype=int)
 
@@ -83,4 +87,3 @@ def generate_rewired_grid_tau_guaranteed_connectivity(height: int, width: int, p
 
         if check_connectivity(tau):
             return tau
-

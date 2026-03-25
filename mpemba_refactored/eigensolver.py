@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import eig
 from scipy.sparse import csc_matrix, identity
-from scipy.sparse.linalg import LinearOperator, eigs, splu
+from scipy.sparse.linalg import ArpackNoConvergence, LinearOperator, eigs, splu
 
 
 def analyze_liouvillian_modes_dense(liouvillian: np.ndarray):
@@ -20,7 +20,12 @@ def analyze_liouvillian_modes_dense(liouvillian: np.ndarray):
 
 
 def analyze_liouvillian_modes_sparse_robust(liouvillian: csc_matrix, num_modes: int):
-    """Compute slow sparse modes using shift-invert, matching legacy script behavior."""
+    """Compute slow sparse modes using shift-invert, matching legacy script behavior.
+
+    Sparse ARPACK runs may fail for some random rewired samples; for compatibility
+    with the original multicore pipeline those failures are represented as
+    `(None, None)` and filtered by the caller.
+    """
     sigma = 1e-9 + 0j
     try:
         lu = splu(liouvillian - sigma * identity(liouvillian.shape[0], dtype=np.complex128, format="csc"))
@@ -29,6 +34,5 @@ def analyze_liouvillian_modes_sparse_robust(liouvillian: csc_matrix, num_modes: 
         lambda_values = 1.0 / mu_values + sigma
         sort_indices = np.argsort(lambda_values.real)[::-1]
         return lambda_values[sort_indices], mu_vectors[:, sort_indices]
-    except Exception:
+    except (RuntimeError, ArpackNoConvergence, ValueError):
         return None, None
-
