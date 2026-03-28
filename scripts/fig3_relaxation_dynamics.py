@@ -75,10 +75,10 @@ def main():
             print(f"{name}: {elapsed:.3f}s, {len(t)} points")
 
             if name.startswith("3. Four corners") or name.startswith("4. Mixed diagonal") or name.startswith("5. Entangled diagonal"):
-                ax.plot(t, d, label=name, lw=3)
+                ax.plot(t, d, label=name, lw=6)
                 case_data[name] = (t, d)
             else:
-                ax.plot(t, d, label=name, lw=1, alpha=0.5)
+                ax.plot(t, d, label=name, lw=2, alpha=0.5)
 
         if "3. Four corners (Mixed)" in case_data and "5. Entangled diagonal" in case_data:
             t3, d3 = case_data["3. Four corners (Mixed)"]
@@ -94,14 +94,31 @@ def main():
             if inter:
                 ax.plot(inter[0], inter[1], "o", markersize=8, color="red")
 
-        ax.set_title(f"Relaxation dynamics for {n}x{n} lattice", fontsize=16)
-        ax.set_xlabel("Time, t")
-        ax.set_ylabel("Distance metric D(t)")
-        ax.grid(True, which="both", linestyle="--")
-        ax.legend(loc="upper right", fontsize=10)
+        # Tighten plotting area to axes in the 1st quadrant
+        ax.margins(x=0, y=0)
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+
+        # 1.5x larger + bold text
+        ax.set_title(f"Relaxation dynamics for {n}x{n} lattice", fontsize=24, fontweight="bold")
+        ax.set_xlabel("Time, t", fontsize=18, fontweight="bold")
+        ax.set_ylabel("Distance metric D(t)", fontsize=18, fontweight="bold")
+        ax.tick_params(axis="both", labelsize=15)
+        for lbl in ax.get_xticklabels() + ax.get_yticklabels():
+            lbl.set_fontweight("bold")
+
+        # Remove grid
+        ax.grid(False)
+
+        # Bold + larger legend text
+        ax.legend(loc="upper right", prop={"size": 15, "weight": "bold"})
 
         fig.tight_layout()
-        fig.savefig(f"9states_modes_simulation_line_{n}x{n}_with_selection_ENG.png", bbox_inches="tight", pad_inches=0.05)
+        fig.savefig(
+            f"9states_modes_simulation_line_{n}x{n}_with_selection_ENG.png",
+            bbox_inches="tight",
+            pad_inches=0.0,
+        )
         plt.close(fig)
 
 
