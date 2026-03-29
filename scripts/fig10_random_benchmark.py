@@ -21,7 +21,7 @@ def main():
     time_horizon = np.linspace(0, 30, 300)
 
     validator = MpembaValidator(height=h, width=w, p=p_rewire, J=1.0, gamma=0.1)
-    validator.save_state("res_gap/pivoprosto3.pkl")
+    validator.save_state("res_gap/benchmark.pkl")
 
     # Compare targeted state search against random sampling of admissible pairs.
     smart_ok, smart_time, smart_adv, smart_gap = validator.run_smart_strategy_score(time_horizon)
@@ -33,7 +33,7 @@ def main():
 
     rnd_rate = (rnd_ok_count / num_random_trials) * 100
 
-    with open("res_gap/pivoprosto.txt", "w", encoding="utf-8") as out:
+    with open("res_gap/benchmark.txt", "w", encoding="utf-8") as out:
         out.write(f"max metric gap {np.log(validator.n)}\n")
         out.write(f"tau_sys {validator.tau_sys}\n")
         out.write(f"smart_ok={smart_ok}, smart_time={smart_time}, smart_adv={smart_adv}, smart_gap={smart_gap}\n")
@@ -48,7 +48,7 @@ def main():
     ax.set_ylabel("Frequency")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    fig.savefig("res_gap/pivoprosto.png", dpi=150)
+    fig.savefig("res_gap/benchmark.png", dpi=150)
     plt.close(fig)
 
 

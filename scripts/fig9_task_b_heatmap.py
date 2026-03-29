@@ -82,7 +82,6 @@ def main():
 
         ax.margins(0.1)
         ax.set_aspect("equal")
-        ax.set_title(f"Mode k={k}\nB_max ~= {local_max:.2e}", fontsize=14)
         ax.axis("off")
 
         from mpl_toolkits.axes_grid1.inset_locator import inset_axes
@@ -97,20 +96,23 @@ def main():
             borderpad=0,
         )
         cbar = fig.colorbar(nodes, cax=cax, orientation="horizontal")
-        cbar.ax.tick_params(labelsize=10)
+        cbar.ax.tick_params(labelsize=20)
+        for label in cbar.ax.get_xticklabels():
+            label.set_fontweight("bold")
         if i == 1:
-            cbar.set_label("Local excitability |c_k(rho_i)|^2", fontsize=12)
+            cbar.set_label("Local excitability |c_k(rho_i)|^2", fontsize=24, fontweight="bold")
 
     ax_hist = fig.add_subplot(gs[1, :])
     ax_hist.hist(metric_values, bins=25, color="lightgreen", edgecolor="black", alpha=0.7, label="Graph ensemble")
-    ax_hist.axvline(representative["val"], color="red", linestyle="--", linewidth=2, label="Selected representative")
-    ax_hist.set_xlabel("Average shortest path length L_avg", fontsize=12)
-    ax_hist.set_ylabel("Number of graphs", fontsize=12)
-    ax_hist.set_title(f"Selection of representative graph (N={NUM_SEARCH_ITERATIONS})", fontsize=14)
-    ax_hist.legend()
+    ax_hist.axvline(representative["val"], color="red", linestyle="--", linewidth=4, label="Selected representative")
+    ax_hist.set_xlabel("Average shortest path length L_avg", fontsize=24, fontweight="bold")
+    ax_hist.set_ylabel("Number of graphs", fontsize=24, fontweight="bold")
+    ax_hist.tick_params(axis="both", labelsize=20)
+    for label in ax_hist.get_xticklabels() + ax_hist.get_yticklabels():
+        label.set_fontweight("bold")
+    ax_hist.legend(prop={"size": 20, "weight": "bold"}, borderpad=0.8, labelspacing=0.6, handlelength=2.0)
     ax_hist.grid(axis="y", alpha=0.3)
 
-    fig.suptitle(f"Excitability maps: representative case (p={TARGET_P})", fontsize=18, y=0.96)
     fig.savefig(f"Task_B_Strict_Layout_Fixed_test_p_0_ENG{int(TARGET_P * 100)}.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 

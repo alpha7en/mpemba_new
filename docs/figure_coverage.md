@@ -23,7 +23,7 @@ This map tracks which refactored script generates each final research block.
 - `fig_9`/`fig_10` combined panel -> `scripts/fig9_task_b_heatmap.py`
   - Outputs: `Task_B_Strict_Layout_Fixed_test_p_0_ENG15.png`.
 - `fig_10` benchmark analysis -> `scripts/fig10_random_benchmark.py`
-  - Outputs benchmark artifacts in `res_gap/` (`pivoprosto.png`, `pivoprosto.txt`, checkpoint `.pkl`).
+  - Outputs benchmark artifacts in `res_gap/` (`benchmark.png`, `benchmark.txt`, checkpoint `.pkl`).
 - `fig_11` -> `scripts/fig11_algorithm_visual.py`
   - Outputs: `Step1_Three_Modes.png`, `Step2_Hot_State.png`,
     `Step3_Cold_Iterations.png`, `Step4_Final_Algorithm_Selection.png`.

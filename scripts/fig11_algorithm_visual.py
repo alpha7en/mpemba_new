@@ -30,7 +30,7 @@ TARGET_P = 0.15
 # ---------------------------
 # Optional cached-state file
 # ---------------------------
-CHECKPOINT = "res_gap/pivoprosto.pkl"
+CHECKPOINT = "res_gap/benchmark.pkl"
 
 # ---------------------------
 # Optimization exponents: Score = Ratio^POW_B * Gap^POW_A

@@ -5,51 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4140bbb4-a648-4131-a2d6-747952799d2d" name="Changes" comment="new">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/mpemba_new.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/equivalence_notes.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/figure_coverage.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/legacy_to_refactor_traceability.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/method_inventory.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/_bootstrap.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig10_random_benchmark.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig11_algorithm_visual.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig1_grouped_modes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig2_projection_bars_and_modes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig3_relaxation_dynamics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig4_average_path_length.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig5_topology_and_spectrum.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig6_lambda_visualization.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig7_ipr_visualization.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fig9_task_b_heatmap.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/first_mode_analysis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/run_multicore_npz.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research.egg-info/PKG-INFO" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research.egg-info/SOURCES.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research.egg-info/dependency_links.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research.egg-info/requires.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research.egg-info/top_level.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/liouvillian.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/metrics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/mpemba.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/mpemba_validation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/network_metrics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/npz_io.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/simulation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/spectral.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/states.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/topology.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/qdyn_research/visualization.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_regression_core.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_smoke.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/figure_coverage.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/figure_coverage.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/fig10_random_benchmark.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/fig10_random_benchmark.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/fig11_algorithm_visual.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/fig11_algorithm_visual.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/fig4_average_path_length.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/fig4_average_path_length.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/fig5_topology_and_spectrum.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/fig5_topology_and_spectrum.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/fig6_lambda_visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/fig6_lambda_visualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/fig7_ipr_visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/fig7_ipr_visualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/fig9_task_b_heatmap.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/fig9_task_b_heatmap.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,26 +23,35 @@
   <component name="CopilotPersistence">
     <persistenceIdMap>
       <entry key="_/Users/alpha7en/PycharmProjects/mpemba_new" value="3BRvPxLYTwL9j0xTZcbvyZhBuX4" />
+      <entry key="_/Users/alpha7en/PycharmProjects/mpemba_neww" value="3Bca8CyG1cilNeBIoI0fKBDuRkE" />
     </persistenceIdMap>
+  </component>
+  <component name="CopilotUserSelectedChatMode">
+    <option name="chatModeId" value="Edit" />
+  </component>
+  <component name="CopilotUserSelectedModel">
+    <selectedModels>
+      <entry key="edit-panel" value="GPT-5.3-Codex" />
+    </selectedModels>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "alpha7en"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;alpha7en&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/alpha7en/mpemba_new.git",
-    "accountId": "2d28bbb7-30f0-4e35-a3f0-48944d276494"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/alpha7en/mpemba_new.git&quot;,
+    &quot;accountId&quot;: &quot;2d28bbb7-30f0-4e35-a3f0-48944d276494&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="3BRvPxLYTwL9j0xTZcbvyZhBuX4" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -86,11 +59,20 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.fig10_random_benchmark.executor": "Run",
+    "Python.fig1_grouped_modes.executor": "Run",
+    "Python.fig2_projection_bars_and_modes.executor": "Run",
+    "Python.fig3_relaxation_dynamics.executor": "Run",
+    "Python.fig4_average_path_length.executor": "Run",
+    "Python.fig5_topology_and_spectrum.executor": "Run",
+    "Python.fig6_lambda_visualization.executor": "Run",
+    "Python.fig7_ipr_visualization.executor": "Run",
+    "Python.fig9_task_b_heatmap.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "temp__branch",
-    "last_opened_file_path": "/Users/alpha7en/PycharmProjects/mpemba_new",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/alpha7en/PycharmProjects/mpemba_neww/scripts",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -100,10 +82,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/scripts" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.fig10_random_benchmark">
     <configuration default="true" type="DjangoTestsConfigurationType">
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -140,6 +123,121 @@
       <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fig10_random_benchmark" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mpemba_new" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/fig10_random_benchmark.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fig4_average_path_length" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mpemba_new" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/fig4_average_path_length.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fig5_topology_and_spectrum" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mpemba_new" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/fig5_topology_and_spectrum.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fig6_lambda_visualization" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mpemba_new" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/fig6_lambda_visualization.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fig7_ipr_visualization" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mpemba_new" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/fig7_ipr_visualization.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -208,6 +306,15 @@
       <option name="docutils_open_in_browser" value="false" />
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.fig10_random_benchmark" />
+        <item itemvalue="Python.fig7_ipr_visualization" />
+        <item itemvalue="Python.fig5_topology_and_spectrum" />
+        <item itemvalue="Python.fig6_lambda_visualization" />
+        <item itemvalue="Python.fig4_average_path_length" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -225,6 +332,8 @@
       <option name="presentableId" value="Default" />
       <updated>1774464676262</updated>
       <workItem from="1774464677314" duration="1244000" />
+      <workItem from="1774726388334" duration="1442000" />
+      <workItem from="1774773965701" duration="16270000" />
     </task>
     <task id="LOCAL-00001" summary="new">
       <option name="closed" value="true" />
@@ -265,6 +374,17 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig7_ipr_visualization.coverage" NAME="fig7_ipr_visualization Coverage Results" MODIFIED="1774819217919" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig10_random_benchmark.coverage" NAME="fig10_random_benchmark Coverage Results" MODIFIED="1774819699132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig1_grouped_modes.coverage" NAME="fig1_grouped_modes Coverage Results" MODIFIED="1774804252932" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig4_average_path_length.coverage" NAME="fig4_average_path_length Coverage Results" MODIFIED="1774813996460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig6_lambda_visualization.coverage" NAME="fig6_lambda_visualization Coverage Results" MODIFIED="1774814732775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig2_projection_bars_and_modes.coverage" NAME="fig2_projection_bars_and_modes Coverage Results" MODIFIED="1774804255384" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig9_task_b_heatmap.coverage" NAME="fig9_task_b_heatmap Coverage Results" MODIFIED="1774812370761" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig5_topology_and_spectrum.coverage" NAME="fig5_topology_and_spectrum Coverage Results" MODIFIED="1774818993290" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/mpemba_neww$fig3_relaxation_dynamics.coverage" NAME="fig3_relaxation_dynamics Coverage Results" MODIFIED="1774790148790" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

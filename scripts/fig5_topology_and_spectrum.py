@@ -3,6 +3,7 @@ from _bootstrap import ensure_src_on_path
 ensure_src_on_path()
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 
 from qdyn_research.liouvillian import build_liouvillian_dense
 from qdyn_research.spectral import analyze_liouvillian_modes_dense
@@ -29,7 +30,6 @@ def draw_topology(ax, tau, height, width, mode, extra_links=None, p=None):
             for j in range(i + 1, n):
                 if tau[i, j] == 1 and initial_tau[i, j] == 0:
                     special_edges.append((i, j))
-        ax.text(0.02, 0.98, f"p = {p}", transform=ax.transAxes, fontsize=14, va="top", bbox=dict(boxstyle="round", fc="wheat", alpha=0.7))
 
     if special_edges:
         colors = plt.get_cmap("gist_rainbow", len(special_edges))
@@ -41,7 +41,8 @@ def draw_topology(ax, tau, height, width, mode, extra_links=None, p=None):
     ax.scatter([p_[0] for p_ in pos.values()], [p_[1] for p_ in pos.values()], s=150, c=node_colors, edgecolors="black", zorder=2)
     ax.set_aspect("equal")
     ax.axis("off")
-    ax.set_title(f"Топология сети (Режим: {mode})", fontsize=16)
+    if mode != "rewired":
+        ax.set_title(f"Топология сети (Режим: {mode})", fontsize=16, fontweight="bold")
 
 
 def draw_spectrum(ax, eigenvalues):
@@ -50,18 +51,43 @@ def draw_spectrum(ax, eigenvalues):
     ax.spines["bottom"].set_position("zero")
     ax.spines["right"].set_color("none")
     ax.spines["top"].set_color("none")
-    ax.set_xlabel("Re(lambda)", loc="right")
-    ax.set_ylabel("Im(lambda)", loc="top", rotation=0)
-    ax.set_title("Спектр собственных значений Лиувиллиана", fontsize=16)
-    ax.grid(True)
+
+    ax.set_xlabel(r"$\mathbf{Re}\,\boldsymbol{\lambda}$", loc="right", fontsize=20, fontweight="bold")
+    ax.set_ylabel(r"$\mathbf{Im}\,\boldsymbol{\lambda}$", fontsize=20, fontweight="bold")
+    ax.set_title("Eigenvalue spectrum of Liouvillian", fontsize=25, fontweight="bold")
+
+    ax.minorticks_on()
+    ax.tick_params(axis="both", which="major", labelsize=20, length=4, width=1.2, direction="inout")
+    ax.tick_params(axis="both", which="minor", length=2, width=1.0, direction="inout")
+
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_fontweight("bold")
+
+    # hide duplicate 0 at origin on Y axis
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda val, pos: "" if abs(val) < 1e-12 else f"{val:g}"))
+
+    # center X coordinate of Y-label on the moved vertical axis (x=0)
+    x0_display = ax.transData.transform((0, 0))[0]
+    x0_axes = ax.transAxes.inverted().transform((x0_display, 0))[0]
+
+    # move Y-label upward to approximately y=3.7 (in data coordinates)
+    y_target_display = ax.transData.transform((0, 3.7))[1]
+    y_target_axes = ax.transAxes.inverted().transform((0, y_target_display))[1]
+
+    # shift label a bit to the right of the vertical axis to avoid overlap with y tick labels
+    x_shift_axes = 0.05
+    ax.yaxis.set_label_coords(x0_axes + x_shift_axes, y_target_axes)
+    ax.yaxis.label.set_horizontalalignment("left")
+
+    ax.grid(False)
 
 
 def main():
     # ---------------------------
     # System and plotting parameters
     # ---------------------------
-    height = 6
-    width = 6
+    height =10
+    width = 10
     j = 1.0
     gamma = 0.1
     num_modes_to_plot = 200
@@ -77,10 +103,10 @@ def main():
         kwargs = {"extra_links": links}
         filename = f"{width}x{height} {mode} spectrum"
     else:
-        p_rewire = 0.03
+        p_rewire = 0.1
         tau = generate_rewired_grid_tau(height, width, p_rewire)
         kwargs = {"p": p_rewire}
-        filename = f"{width}x{height} {mode}  spectrum p0_{int(p_rewire * 10)}"
+        filename = f"{width}x{height} {mode}  spectrum p0_{int(p_rewire * 100)}"
 
     # Liouvillian spectrum lambda_k is plotted in the complex plane (Re, Im).
     liouvillian = build_liouvillian_dense(tau, j, gamma)
