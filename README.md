@@ -22,8 +22,6 @@ This separation is intentional: long simulation is executed rarely, while analys
   - scientific kernels: topology generation, Liouvillian builders, spectral solvers, metrics, ODE utilities
 - `scripts/`
   - runnable figure/analysis scripts
-- `tests/`
-  - smoke and regression checks for core behavior
 - `docs/`
   - method inventory and figure coverage notes
 
