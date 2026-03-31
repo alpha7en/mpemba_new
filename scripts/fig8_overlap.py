@@ -1,7 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import glob
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 from pathlib import Path
 from collections import defaultdict
 import random
@@ -9,42 +11,13 @@ import networkx as nx
 import community as community_louvain  # pip install python-louvain
 
 
+from _bootstrap import ensure_src_on_path
+ensure_src_on_path()
 
-def generate_grid_tau(height: int, width: int) -> np.ndarray:
-    """Генерация базовой решетки."""
-    N = height * width;
-    tau = np.zeros((N, N), dtype=int)
-    for i in range(N):
-        if (i + 1) % width != 0: tau[i, i + 1] = tau[i + 1, i] = 1
-        if i < N - width: tau[i, i + width] = tau[i + width, i] = 1
-    return tau
-
-
-def regenerate_rewired_tau(height: int, width: int, p: float, seed: int) -> np.ndarray:
-    """
-    Восстанавливает ТОЧНО ТУ ЖЕ сеть, которая была сгенерирована при сборе данных,
-    используя тот же seed (run_idx). Это критично для поиска реальных сообществ.
-    """
-    random.seed(seed)
-
-    initial_tau = generate_grid_tau(height, width)
-    tau = initial_tau.copy()
-    N = height * width
-    edges = [(i, j) for i in range(N) for j in range(i + 1, N) if initial_tau[i, j] == 1]
-    random.shuffle(edges)
-
-    for u, v in edges:
-        if random.random() < p:
-            node_to_rewire = u if random.random() < 0.5 else v
-            original_partner = v if node_to_rewire == u else u
-            neighbors = np.where(tau[node_to_rewire, :] == 1)[0]
-            forbidden_nodes = set(neighbors) | {node_to_rewire, original_partner}
-            valid_targets = [n for n in range(N) if n not in forbidden_nodes]
-            if valid_targets:
-                w = random.choice(valid_targets)
-                tau[u, v] = tau[v, u] = 0
-                tau[node_to_rewire, w] = tau[w, node_to_rewire] = 1
-    return tau
+from qdyn_research.topology import (
+    generate_grid_tau,
+    generate_rewired_grid_tau_guaranteed_connectivity,
+)
 
 
 def calculate_max_overlap(eigenvector: np.ndarray, communities: dict, N: int) -> float:
@@ -155,8 +128,9 @@ if __name__ == "__main__":
             for run_data in grouped_data[p]:
                 run_idx = run_data['run_idx']
 
-                # А. Восстанавливаем топологию сети для данного запуска
-                tau = regenerate_rewired_tau(HEIGHT, WIDTH, p, seed=run_idx)
+                # А. Восстанавливаем топологию сети для данного запуска (через библиотеку src)
+                random.seed(run_idx)
+                tau = generate_rewired_grid_tau_guaranteed_connectivity(HEIGHT, WIDTH, p)
                 G = nx.from_numpy_array(tau)
 
                 # Б. Находим сообщества алгоритмом Лувена
@@ -185,18 +159,32 @@ if __name__ == "__main__":
             overlap_results[mode_idx]['avg'],
             yerr=overlap_results[mode_idx]['std'],
             fmt='-o', capsize=5,
-            label=f'Средний MaxOverlap',
+            label='Average MaxOverlap',
             color='darkred' if mode_idx == 1 else 'darkgreen' if mode_idx == 2 else 'darkblue'
         )
 
-        ax.set_title(f"Локализация моды λ_{mode_idx} на сообществах", fontsize=16)
-        ax.set_xlabel("Вероятность перестроения (p)", fontsize=12)
-        ax.set_ylabel(f"⟨MaxOverlap(λ_{mode_idx})⟩", fontsize=12)
+
+        ax.set_xlabel("p", fontsize=24, fontweight='bold')
+        ax.set_ylabel("Average MaxOverlap", fontsize=24, fontweight='bold')
         ax.grid(True, which='both', linestyle='--')
         ax.set_xscale('log')
         ax.set_xticks([0.001, 0.01, 0.1, 1.0])
         ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
 
+        # bold + larger tick labels
+        ax.tick_params(axis='both', which='major', labelsize=20)
+        for tick in ax.get_xticklabels() + ax.get_yticklabels():
+            tick.set_fontweight('bold')
+
+        # log-aware padding on both sides:
+        # left: slightly less than min positive p (so first point is not clipped)
+        # right: slightly greater than 1.0 (so point at p=1 is visible)
+        p_min = min(v for v in p_values if v > 0)
+        pad_decades = 0.1
+        pad_factor = 10 ** pad_decades
+        ax.set_xlim(p_min / pad_factor, 1.0 * pad_factor)
+
         plt.tight_layout()
         plt.savefig(f"MaxOverlap_mode_k{mode_idx}_{HEIGHT}x{WIDTH}.png")
         plt.show()
+
