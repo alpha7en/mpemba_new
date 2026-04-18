@@ -25,6 +25,11 @@ def main():
 
     # Compare targeted state search against random sampling of admissible pairs.
     smart_ok, smart_time, smart_adv, smart_gap = validator.run_smart_strategy_score(time_horizon)
+
+    if smart_ok:
+        t_max = max(30, int(10 * smart_time))
+        time_horizon = np.linspace(0, t_max, t_max * 10)
+
     rnd_ok_count, rnd_times = validator.run_random_pull_strategy(
         num_random_trials,
         time_horizon,
