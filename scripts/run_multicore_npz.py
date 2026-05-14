@@ -77,7 +77,7 @@ def main():
     if data_to_save:
         # A single compressed file avoids repeating multi-hour spectral runs.
         out_file = save_npz_bundle(data_to_save, height=height, width=width)
-        print(f"Saved {len(data_to_save) // 3} runs to {out_file}")
+        print(f"Saved {len(data_to_save) // 4} runs to {out_file}")  # 4 keys per run: lambdas, vectors, p_value, tau
     else:
         print("No data produced.")
 

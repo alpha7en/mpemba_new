@@ -4,7 +4,7 @@ from .metrics import entropic_distance, get_projection_coefficient
 
 
 # Mpemba search helpers used by fig_9_10_11 scripts.
-def find_guaranteed_mpemba_dense(left_vecs, right_vecs, n_sites, excitability_map, mode_idx=1, distance_order="C"):
+def find_guaranteed_mpemba_dense(left_vecs, right_vecs, n_sites, excitability_map, mode_idx=1, distance_order="C", return_history=False):
     """Select hot/cold pair by maximizing projection ratio and score over bright-node mixtures."""
     w_vec = left_vecs[:, mode_idx]
     v_vec = right_vecs[:, mode_idx]
@@ -24,7 +24,9 @@ def find_guaranteed_mpemba_dense(left_vecs, right_vecs, n_sites, excitability_ma
     best_ratio_vec = None
     best_score_vec = None
 
-    for m in range(2, max(3, int(n_sites / 2))):
+    history = []
+
+    for m in range(2, int(n_sites / 2) + 1):
         chosen = sorted_nodes[:m]
         rho_cold = np.zeros((n_sites, n_sites), dtype=complex)
         for node in chosen:
@@ -34,11 +36,21 @@ def find_guaranteed_mpemba_dense(left_vecs, right_vecs, n_sites, excitability_ma
         c_cold = np.abs(get_projection_coefficient(w_vec, v_vec, vec_cold))
         d_cold = entropic_distance(vec_cold, n_sites, reshape_order=distance_order)
 
-        if d_cold >= d_hot - 0.01:
+        valid = d_cold < d_hot
+        if not valid:
+            history.append({
+                "m": m, "nodes": chosen, "vec_mix": vec_cold, "c_mix": c_cold, "d_mix": d_cold,
+                "ratio": 0.0, "gap": 0.0, "score": 0.0, "valid": False
+            })
             continue
 
         ratio = (c_cold / (c_hot + 1e-15)) ** 2
         score = ratio * np.abs(d_cold - d_hot)
+
+        history.append({
+            "m": m, "nodes": chosen, "vec_mix": vec_cold, "c_mix": c_cold, "d_mix": d_cold,
+            "ratio": ratio, "gap": np.abs(d_cold - d_hot), "score": score, "valid": True
+        })
 
         if ratio > best_ratio:
             best_ratio = ratio
@@ -55,5 +67,7 @@ def find_guaranteed_mpemba_dense(left_vecs, right_vecs, n_sites, excitability_ma
     if best_score_vec is None:
         best_score_vec = best_ratio_vec
 
+    if return_history:
+        return vec_hot, best_ratio_vec, best_score_vec, history
     return vec_hot, best_ratio_vec, best_score_vec
 

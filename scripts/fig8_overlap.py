@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from pathlib import Path
 from collections import defaultdict
-import random
+
 import networkx as nx
 import community as community_louvain  # pip install python-louvain
 
@@ -102,8 +102,11 @@ if __name__ == "__main__":
             p_val = float(parts[1])
             run_idx = int(parts[3])
 
+            tau_key = f"{base_key}_tau"
+            tau_arr = data[tau_key] if tau_key in data else None
+
             p_values_from_file.add(p_val)
-            grouped_data[p_val].append({'run_idx': run_idx, 'vectors': data[key]})
+            grouped_data[p_val].append({'run_idx': run_idx, 'vectors': data[key], 'tau': tau_arr})
 
     p_values = sorted(list(p_values_from_file))
 
@@ -128,9 +131,15 @@ if __name__ == "__main__":
             for run_data in grouped_data[p]:
                 run_idx = run_data['run_idx']
 
-                # А. Восстанавливаем топологию сети для данного запуска (через библиотеку src)
-                random.seed(run_idx)
-                tau = generate_rewired_grid_tau_guaranteed_connectivity(HEIGHT, WIDTH, p)
+                # А. Получаем топологию сети:
+                #    Приоритет 1 — матрица смежности прямо из NPZ (точное совпадение с eigenvectors).
+                #    Приоритет 2 — воспроизведение через seed=run_idx (для старых NPZ без tau).
+                if run_data['tau'] is not None:
+                    tau = run_data['tau']
+                else:
+                    tau = generate_rewired_grid_tau_guaranteed_connectivity(
+                        HEIGHT, WIDTH, p, seed=run_idx
+                    )
                 G = nx.from_numpy_array(tau)
 
                 # Б. Находим сообщества алгоритмом Лувена

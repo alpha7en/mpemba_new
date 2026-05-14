@@ -17,7 +17,7 @@ def main():
     # ---------------------------
     h, w = 6, 6
     p_rewire = 0.15
-    num_random_trials = 5000
+    num_random_trials = 10000
     time_horizon = np.linspace(0, 30, 300)
 
     validator = MpembaValidator(height=h, width=w, p=p_rewire, J=1.0, gamma=0.1)

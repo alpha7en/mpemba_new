@@ -10,8 +10,15 @@ from .topology import generate_rewired_grid_tau_guaranteed_connectivity
 
 
 def run_single_sparse_rewiring_job(p, run_idx, height, width, j, gamma, num_modes):
-    """Run one sparse spectral sample and store keys p_{p}_run_{idx}_{lambdas,vectors,p_value}."""
-    tau = generate_rewired_grid_tau_guaranteed_connectivity(height, width, p)
+    """Run one sparse spectral sample and store keys p_{p}_run_{idx}_{lambdas,vectors,p_value,tau}.
+
+    The adjacency matrix tau is generated with seed=run_idx so that the same
+    graph can be exactly reproduced in analysis scripts (e.g. fig8_overlap.py)
+    by calling generate_rewired_grid_tau_guaranteed_connectivity with the same
+    seed.  tau is also stored in the NPZ bundle as a direct source of truth.
+    """
+    # seed = run_idx guarantees deterministic topology per (p, run_idx) pair.
+    tau = generate_rewired_grid_tau_guaranteed_connectivity(height, width, p, seed=run_idx)
     liouvillian = build_liouvillian_sparse(tau, j, gamma)
     lambdas, vectors = analyze_liouvillian_modes_sparse_robust(liouvillian, num_modes=num_modes)
     if lambdas is None:
@@ -21,6 +28,7 @@ def run_single_sparse_rewiring_job(p, run_idx, height, width, j, gamma, num_mode
         f"{prefix}_lambdas": lambdas,
         f"{prefix}_vectors": vectors,
         f"{prefix}_p_value": p,
+        f"{prefix}_tau": tau,  # adjacency matrix saved for exact graph reproduction in fig8
     }
 
 

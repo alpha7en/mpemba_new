@@ -19,7 +19,10 @@ This map tracks which refactored script generates each final research block.
   - Reads existing `.npz`; outputs mode-wise plots and gap plots in `visualisation_plots_ENG_captions/`.
 - `fig_7` -> `scripts/fig7_ipr_visualization.py`
   - Reads existing `.npz`; outputs IPR plots in `IPR from p images ENG/`.
-- `fig_8` -> `PASS` (kept intentionally empty, as in legacy structure).
+- `fig_8` -> `scripts/fig8_overlap.py`
+  - Reads `.npz` (uses saved `tau` key when available, falls back to `seed=run_idx` for legacy files).
+  - Outputs: `MaxOverlap_mode_k1_{H}x{W}.png`, `MaxOverlap_mode_k2_{H}x{W}.png`,
+    `MaxOverlap_mode_k3_{H}x{W}.png`.
 - `fig_9`/`fig_10` combined panel -> `scripts/fig9_task_b_heatmap.py`
   - Outputs: `Task_B_Strict_Layout_Fixed_test_p_0_ENG15.png`.
 - `fig_10` benchmark analysis -> `scripts/fig10_random_benchmark.py`

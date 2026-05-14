@@ -8,7 +8,7 @@ from qdyn_research.mpemba import find_guaranteed_mpemba_dense
 from qdyn_research.spectral import analyze_liouvillian_modes_dense_strict
 from qdyn_research.topology import generate_rewired_grid_tau_guaranteed_connectivity
 
-def main(height=5, width=5, p=0.15, j=1.0, gamma=0.5):
+def main(height=5, width=5, p=0.15, j=1.0, gamma=0.1):
     # ---------------------------
     # System parameters
     # ---------------------------

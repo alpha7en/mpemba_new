@@ -37,7 +37,7 @@ def main():
     # Dynamics parameters
     # ---------------------------
     j_val = 1.0
-    gamma_val = 0.5
+    gamma_val = 0.1
 
     # ---------------------------
     # Initial-state ensemble

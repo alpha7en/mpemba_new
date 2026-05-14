@@ -114,13 +114,14 @@ def main():
     fig1.savefig("Step1_Three_Modes.png", bbox_inches="tight", dpi=150)
     plt.close(fig1)
 
-    vec_hot, vec_cold, vec_cold_score = find_guaranteed_mpemba_dense(
+    vec_hot, vec_cold, vec_cold_score, history = find_guaranteed_mpemba_dense(
         left_vecs,
         right_vecs,
         N,
         excitability_map=b_map_1,
         mode_idx=1,
         distance_order="C",
+        return_history=True,
     )
 
     hot_node = int(np.argmax(np.abs(vec_hot.reshape((N, N)).diagonal())))
@@ -147,45 +148,23 @@ def main():
     fig2.savefig("Step2_Hot_State.png", bbox_inches="tight", dpi=150)
     plt.close(fig2)
 
-    sorted_indices = np.argsort(b_map_1)[::-1]
-    m_values = list(range(2, min(11, N // 2 + 1)))
-    n_plots = len(m_values)
+    history_subset = [h for h in history if h["m"] <= 10]
+    n_plots = len(history_subset)
     cols = 3
     rows = (n_plots + cols - 1) // cols
 
     fig3 = plt.figure(figsize=(5 * cols, 6 * rows))
     gs3 = gridspec.GridSpec(rows, cols, hspace=0.4, wspace=0.1)
 
-    best_score = -1.0
-    best_nodes = []
-    best_cold_vec = None
-    best_cold_c1 = 0.0
-    best_cold_d = 0.0
-    best_cold_ratio = 0.0
+    for idx, h in enumerate(history_subset):
+        m = h["m"]
+        current_nodes = h["nodes"]
+        vec_mix = h["vec_mix"]
+        c_mix = h["c_mix"]
+        d_mix = h["d_mix"]
+        score_m = h["score"]
 
-    for idx, m in enumerate(m_values):
         ax = fig3.add_subplot(gs3[idx // cols, idx % cols])
-        current_nodes = sorted_indices[:m]
-        rho_mix = np.zeros((N, N), dtype=complex)
-        for node in current_nodes:
-            rho_mix[node, node] = 1.0 / m
-        vec_mix = rho_mix.flatten(order="C")
-
-        c_mix = np.abs(get_projection_coefficient(w_vec_1, v_vec_1, vec_mix))
-        d_mix = entropic_distance(vec_mix, N, reshape_order="C")
-        valid = d_mix < d_hot
-        ratio_m = c_mix / (c_hot + 1e-15) if valid else 0.0
-        gap_m = np.abs(d_hot - d_mix) if valid else 0.0
-        score_m = (ratio_m ** POW_B) * (gap_m ** POW_A) if valid else 0.0
-
-        if score_m > best_score:
-            best_score = score_m
-            best_nodes = list(current_nodes)
-            best_cold_vec = vec_mix
-            best_cold_c1 = c_mix
-            best_cold_d = d_mix
-            best_cold_ratio = ratio_m
-
         draw_base_graph(ax, graph, pos, b_map_1, scale_factor, title=f"M = {m}")
         highlight_nodes(ax, graph, pos, current_nodes, "blue", scale_factor)
         ax.text(
@@ -207,16 +186,10 @@ def main():
     draw_base_graph(ax4, graph, pos, b_map_1, scale_factor, title="Step 4: Final pair")
     highlight_nodes(ax4, graph, pos, [hot_node], "red", scale_factor)
 
-    if best_cold_vec is None:
-        best_cold_vec = vec_cold_score
-        best_cold_c1 = c_cold
-        best_cold_d = d_cold
-        best_cold_ratio = c_cold / (c_hot + 1e-15)
-
-    cold_diag = best_cold_vec.reshape((N, N)).diagonal().real
-    cold_nodes = np.where(cold_diag > 0)[0]
-    if len(best_nodes) > 0:
-        cold_nodes = np.array(best_nodes)
+    best_cold_vec = vec_cold_score
+    best_cold_c1 = c_cold  # projection coefficient for the fallback cold state
+    best_cold_d = d_cold
+    best_cold_ratio = best_cold_c1 / (c_hot + 1e-15)
     # Final panel follows the published workflow emphasis on the hot (dark) site.
 
     legend_elements = [

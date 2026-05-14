@@ -53,8 +53,29 @@ def generate_grid_with_manual_links_tau(height: int, width: int, extra_links: li
     return tau
 
 
-def generate_rewired_grid_tau(height: int, width: int, p: float) -> np.ndarray:
-    """Single-pass Watts-Strogatz-style rewiring with edge-level probability p."""
+def generate_rewired_grid_tau(height: int, width: int, p: float, seed: int | None = None) -> np.ndarray:
+    """Single-pass Watts-Strogatz-style rewiring with edge-level probability p.
+
+    Does **not** guarantee connectivity of the resulting graph. Suitable for
+    topological statistics (e.g. average path length via the largest connected
+    component) where disconnected samples are handled explicitly by the caller.
+
+    Algorithm differences vs. the connectivity-guaranteed variant:
+    - No rejection loop: each edge is rewired at most once.
+    - ``forbidden_nodes`` does *not* exclude the original partner, so a rewired
+      edge may accidentally reconnect to its previous endpoint (harmless for
+      statistical averages, but avoided in the guaranteed variant).
+
+    Args:
+        height: Number of rows in the base grid.
+        width:  Number of columns in the base grid.
+        p:      Per-edge rewiring probability in [0, 1].
+        seed:   Optional integer seed for :mod:`random` PRNG.  When given, the
+                module-level state is set via ``random.seed(seed)`` before any
+                random calls so that results are exactly reproducible.
+    """
+    if seed is not None:
+        random.seed(seed)
     initial_tau = generate_grid_tau(height, width)
     tau = initial_tau.copy()
     n = height * width
@@ -75,8 +96,34 @@ def generate_rewired_grid_tau(height: int, width: int, p: float) -> np.ndarray:
     return tau
 
 
-def generate_rewired_grid_tau_guaranteed_connectivity(height: int, width: int, p: float) -> np.ndarray:
-    """Rewire edges with probability p and reject samples until the graph is connected."""
+def generate_rewired_grid_tau_guaranteed_connectivity(
+    height: int, width: int, p: float, seed: int | None = None
+) -> np.ndarray:
+    """Rewire edges with probability p; resample until the graph is connected.
+
+    Suitable for spectral analysis of the Lindblad/Liouvillian operator, which
+    requires a **unique** stationary state. A disconnected graph would produce
+    multiple zero eigenvalues and invalidate the spectral decomposition.
+
+    Algorithm differences vs. :func:`generate_rewired_grid_tau`:
+    - Rejection loop: the entire rewiring is redrawn whenever the resulting
+      graph is disconnected.
+    - ``forbidden_nodes`` additionally excludes ``original_partner`` of the
+      rewired endpoint, preventing the creation of trivial multi-edges back to
+      the original neighbour.
+
+    Args:
+        height: Number of rows in the base grid.
+        width:  Number of columns in the base grid.
+        p:      Per-edge rewiring probability in [0, 1].
+        seed:   Optional integer seed for :mod:`random` PRNG.  When given, the
+                module-level state is set via ``random.seed(seed)`` **once**
+                before the first rewiring attempt.  Subsequent rejection-loop
+                iterations continue from the evolved PRNG state so that the
+                seed uniquely determines the returned graph.
+    """
+    if seed is not None:
+        random.seed(seed)
     while True:
         initial_tau = generate_grid_tau(height, width)
         tau = initial_tau.copy()
