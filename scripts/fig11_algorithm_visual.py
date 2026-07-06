@@ -133,6 +133,16 @@ def main():
     c_cold = np.abs(get_projection_coefficient(w_vec_1, v_vec_1, vec_cold_score))
     d_cold = entropic_distance(vec_cold_score, N, reshape_order="C")
 
+    # Recover the cold-mixture node set (the M brightest nodes) behind the
+    # score-optimal cold state, so Step 4 can label and highlight the final pair.
+    valid_history = [h for h in history if h["valid"]]
+    if valid_history:
+        best_cold_entry = max(valid_history, key=lambda h: h["score"])
+        cold_nodes = list(best_cold_entry["nodes"])
+    else:
+        cold_diag = np.abs(vec_cold_score.reshape((N, N)).diagonal())
+        cold_nodes = list(np.where(cold_diag > 1e-9)[0])
+
     fig2, ax2 = plt.subplots(figsize=(7, 7))
     draw_base_graph(ax2, graph, pos, b_map_1, scale_factor, title="Step 2: Hot node from dark region")
     highlight_nodes(ax2, graph, pos, [hot_node], "red", scale_factor)
@@ -185,6 +195,7 @@ def main():
     plt.subplots_adjust(left=0.05, right=0.65, top=0.9, bottom=0.1)
     draw_base_graph(ax4, graph, pos, b_map_1, scale_factor, title="Step 4: Final pair")
     highlight_nodes(ax4, graph, pos, [hot_node], "red", scale_factor)
+    highlight_nodes(ax4, graph, pos, cold_nodes, "blue", scale_factor)
 
     best_cold_vec = vec_cold_score
     best_cold_c1 = c_cold  # projection coefficient for the fallback cold state
@@ -244,7 +255,7 @@ def main():
 
     ax4.text(
         0.5,
-        -0.04,
+        -0.14,
         f"Cold nodes={len(cold_nodes)} | |c1_cold|={best_cold_c1:.3f} | ratio={ratio:.2f} | Gap={gap:.3f}",
         transform=ax4.transAxes,
         ha="center",

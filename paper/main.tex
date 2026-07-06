@@ -1,0 +1,706 @@
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
+
+% --- math / physics ---
+\usepackage{amsmath,amssymb}
+\usepackage{physics}
+\usepackage{bm}
+% --- figures / floats ---
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+% --- algorithms ---
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+% --- neutralize draft working-note colors (\textcolor{c}{txt} -> txt) ---
+\usepackage{xcolor}
+\renewcommand{\textcolor}[2]{#2}
+
+% custom double-ket used in the Liouville-space notation
+\newcommand{\ketket}[1]{\left| #1 \right\rangle \! \mathclose{\left. \vphantom{#1} \right\rangle}}
+
+\begin{document}
+
+\title[Quantum Mpemba Effect]{Quantum Mpemba Effect in Disordered Lattices}
+
+\author[1]{\fnm{P.\,E.} \sur{Chuklanov}}
+\author[1]{\fnm{M.\,A.} \sur{Less}}
+\author[2]{\fnm{P.\,V.} \sur{Zakharenko}}
+\author[1]{\fnm{D.\,E.} \sur{Zaitsev}}
+\author*[2]{\fnm{A.\,P.} \sur{Alodjants}}\email{Alexander_ap@list.ru}
+
+\affil[1]{\orgname{Moscow Institute of Physics and Technology}, \orgaddress{\city{Dolgoprudny}, \country{Russia}}}
+\affil[2]{\orgname{ITMO University}, \orgaddress{\city{Saint Petersburg}, \country{Russia}}}
+
+\abstract{We investigate the Quantum Mpemba effect (QME) in which a quantum state initially farther from equilibrium relaxes faster than one starting closer. We consider single-photon dynamics in networks of coupled optical waveguides to examine QME. The system is modeled as a quantum walk on a graph subject to local dephasing within the Lindblad master equation framework. By spectrally decomposing the Liouvillian superoperator for regular square lattices, we identify initial states with selective mode content that exhibit pronounced anomalous relaxation. We then introduce a Watts--Strogatz-type edge-rewiring procedure and show that topological disorder localizes the slowest relaxation mode while higher-order modes remain delocalized. This localization asymmetry gives rise to a natural separation of network nodes into ``bright'' and ``dark'' regions with respect to the fundamental mode, enabling a purely geometric construction of Mpemba state pairs. Based on this finding, we propose a deterministic heuristic algorithm that generates initial states with a pronounced Mpemba effect for arbitrary disordered lattice topologies and validate it against Monte Carlo sampling.}
+
+\keywords{Quantum Mpemba effect, Disordered lattices, Open quantum systems, Quantum walks}
+
+\maketitle
+
+\section{Introduction} 
+%The Mpemba effect---the counter-intuitive observation that a system initially \emph{further} from equilibrium can relax to its stationary state \emph{faster} than one starting closer---has fascinated scientists since antiquity and was systematically documented by Mpemba and Osborne in 1969 for the case of hot water freezing faster than cold~\cite{Mpemba1969}. Despite half a century of debate in classical thermodynamics, the origin and generality of the effect remained elusive until a modern theoretical framework rooted in spectral analysis of relaxation dynamics was developed.  A key insight is that anomalous relaxation occurs when the initial state has a suppressed overlap with the slowest decaying eigenmode of the generator governing the dynamics, so that faster-decaying channels dominate the approach to equilibrium.  In the classical domain, this picture was confirmed experimentally in colloidal systems, where exponentially accelerated cooling was demonstrated in a controlled setting~\cite{Kumar2020}.
+
+The Mpemba effect is a counterintuitive relaxation phenomenon in which a system initially farther from equilibrium reaches its stationary state faster than one that starts closer. It was first systematically described by Mpemba and Osborne in 1969 for hot water freezing faster than cold~\cite{Mpemba1969}. Subsequent studies revealed that this effect is not limited to thermal systems but can be understood more generally through the spectral structure of relaxation dynamics. Within this framework, anomalously fast relaxation occurs when the initial state has a weak overlap with the slowest decaying eigenmode of the dynamical generator; the relaxation is then governed primarily by faster modes, and the system approaches equilibrium more quickly. This mechanism has been confirmed experimentally in classical colloidal systems, where accelerated cooling was observed under controlled conditions~\cite{Kumar2020}.
+
+In quantum physics, the Mpemba effect acquires a richer structure. The \emph{Quantum Mpemba Effect} (QME) was discussed by Carollo,
+Lasanta, and Lesanovsky~\cite{Carollo2021}, who showed that in Markovian open quantum systems governed by a Lindblad master equation,
+an appropriately engineered unitary rotation of the initial state can render it orthogonal to the slowest Liouvillian eigenmode, thereby
+\emph{exponentially} accelerating the approach to stationarity. This strong form of the QME relies on the spectral decomposition of
+the Liouvillian superoperator: if the overlap coefficient $c_1$ with the first non-trivial right eigenvector vanishes, the effective
+relaxation gap is set by the second eigenvalue and convergence becomes exponentially faster. In~\cite{Kochsiek2022}, the authors subsequently demonstrated that global spin rotations can serve as a practical, albeit approximate, implementation of this idea in dissipative spin lattices, providing a physically realizable protocol for accelerated relaxation.
+ 
+The QME has since been predicted and observed across a wide range of physical platforms.
+In isolated many-body quantum systems, an analogous effect manifests
+through anomalous symmetry restoration: a tilted ferromagnet with
+\emph{greater} initial symmetry breaking can restore its symmetry
+\emph{faster} than one closer to the symmetric state, as probed
+via entanglement asymmetry.
+The  experimental observation of this phenomenon was reported by Joshi~\emph{et al.}~\cite{Joshi2024} using a trapped-ion quantum simulator, where the effect was monitored through randomized measurements and classical shadows.
+In the domain of open quantum systems, the strong QME---characterized
+by an exponentially accelerated approach to the steady state---was
+experimentally demonstrated in~\cite{Zhang2025} on a single trapped-ion qubit.
+In that work, the strong Mpemba condition was shown to coincide with a Liouvillian exceptional point,
+revealing a deep connection between anomalous relaxation and non-Hermitian physics. Photonic lattices provide a particularly natural and experimentally
+accessible arena for studying the QME. In particular, Longhi~\cite{Longhi2024} demonstrated that the Mpemba effect arises
+in the diffusive dynamics of light in finite-sized photonic lattices under dephasing: certain highly localized initial intensity
+distributions reach the uniform (equilibrium) distribution faster than initially delocalized ones.  
+%An experimentally feasible realization based on optical pulse propagation in  temporal mesh lattices was proposed in the same work.
+Extending these results to the genuinely quantum-optical regime,
+Longhi~\cite{Longhi2024bosonic} predicted a \emph{bosonic} Mpemba
+effect in leaky optical resonators and waveguides by exploiting
+non-classical states of light---Fock states, coherent states, and
+squeezed states---whose distinct photon statistics lead to
+qualitatively different relaxation pathways.
+Together, these photonic studies establish coupled waveguide networks
+as a versatile and tunable platform for engineering anomalous
+relaxation phenomena, bridging the gap between abstract spectral
+theory and concrete quantum-optical implementations. 
+
+In this work, we investigate the QME on graphs that model networks of coupled optical waveguides. We consider the
+quantum walk of a single photon with local dephasing described by a Lindblad master equation. The
+central idea is to exploit the spatial structure of the Liouvillian
+eigenmodes---specifically, the distinction between ``bright'' modes
+(efficiently excited by local perturbations) and ``dark'' modes
+(spatially decoupled from most of the network)---to engineer initial
+states with controlled overlap with the slowest relaxation channels.
+The role of network topology, and in particular the transition from
+regular to disordered (small-world) lattices via an edge-rewiring
+procedure, is a key element of our analysis.
+
+
+The paper is organized as follows.
+In Sec.~2, we introduce the model: the tight-binding Hamiltonian
+for single-photon walks on graphs, the Lindblad master equation
+with local dephasing dissipators, and the distance metric based on
+quantum relative entropy used to identify the Mpemba effect.
+In Sec.~3, we present the Liouvillian vectorization and spectral
+decomposition formalism.
+In Sec.~4, we analyze the mode structure of regular square lattices,
+constructing spatial population maps and identifying geometric
+regularities.
+In Sec.~5, we use the spectral decomposition to design candidate
+initial states with selective mode content and verify the Mpemba
+effect through numerical simulation.
+In Sec.~6, we describe the Watts--Strogatz-type edge-rewiring
+procedure that interpolates between regular and random topologies,
+and characterize the associated small-world crossover.
+In Sec.~7, we perform a detailed spectral and eigenvector analysis
+of the disordered lattices, tracking the evolution of relaxation rates,
+the Inverse Participation Ratio, and the community overlap of the
+slowest modes as functions of the rewiring probability.  We introduce
+the concept of ``Topological Mpemba Effect'' and formulate the
+hypothesis on the bright-to-dark transition of the slowest mode.
+In Sec.~8, we leverage the local excitability maps to propose a
+deterministic heuristic algorithm for constructing pairs of initial
+states that exhibit a pronounced Mpemba effect on arbitrary network
+topologies, and validate it against Monte Carlo sampling.
+Finally, Sec.~9 summarizes the main results and discusses perspectives
+for future work.
+ 
+
+%\textcolor{blue}{In this study, we examine fundamental models of quantum system dynamics in networks of coupled optical waveguides. The structure of this work follows a progression from regular to disordered systems.} 
+
+
+%\textcolor{blue}{First, we treat the waveguide system as a graph and construct the model for photon dynamics. We narrow our focus to regular lattices, for which we analytically derive the explicit form of the corresponding Lindbladians. By investigating the mode structure in these systems, we construct the first examples of initial states that demonstrate the Mpemba effect. Next, using a rewiring procedure, we transition from regular lattices to random graphs and observe how the mode behavior evolves. To explain the observed spectral changes, we introduce hypotheses concerning localization and differences between "dark" and "bright" modes. We then use this "dark/bright" framework to construct excitability (illumination) maps for the graphs. Finally, based on these maps, we propose an algorithm that constructs the initial state with the most pronounced Mpemba effect for any given topology.}
+
+
+
+\section{Model}
+
+\subsection{Hamiltonian of Single-Photon Walk on a Graph}
+We consider the quantum walk of a single photon in a network of coupled optical waveguides~\cite{tang2018}. In the tight-binding approximation, the dynamics of the system are governed by the Hamiltonian:
+\begin{equation}
+\hat{H} = -\frac{J}{2}\sum_{i,j} \tau_{ij}(\hat{a}_i^{\dagger}\hat{a}_j + \hat{a}_j^{\dagger}\hat{a}_i),
+\end{equation}
+where $\hat{a}_i^\dagger$ ($\hat{a}_i$) is the photon creation (annihilation) operator at site $i$, $J$ is the connection constant (hopping rate), which is the same for all nodes, and $\tau$ is the symmetric adjacency matrix of the $N$-node graph.
+
+To include environmental decoherence into our model, we employ the Lindblad master equation framework~\cite{lindblad1976,gks1976,breuer2002}. For a network of optical waveguides, the dominant source of decoherence is local dephasing, which is described by the local number operators acting as dissipators, $\hat{L}_k = \hat{a}_k^\dagger \hat{a}_k = \hat{n}_k$. The evolution of the system's density matrix $\hat{\rho}$ is given by:
+\begin{equation}
+\frac{d\hat{\rho}}{dt} = -i[\hat{H}, \hat{\rho}] + \gamma \sum_{k=1}^N \left( \hat{L}_k \hat{\rho} \hat{L}_k^\dagger - \frac{1}{2}\{\hat{L}_k^\dagger \hat{L}_k, \hat{\rho}\} \right),
+\end{equation}
+where $\gamma > 0$ is the dephasing rate. 
+
+We restrict our analysis strictly to the single-photon subspace, spanned by the localized basis states $|k\rangle$. In this basis, the number operator acts as a projector, $\hat{n}_k|m\rangle = \delta_{k,m}|m\rangle$. Evaluating the matrix elements $\rho_{k,l} = \langle k|\hat{\rho}|l\rangle$, the coherent part naturally yields $H_{k,m} = -J\tau_{k,m}$ (considering that the adjacency matrix is symmetric due to the non-directionality of the graph). The dissipative part simplifies significantly since $\langle k| \hat{n}_m \hat{\rho} \hat{n}_m |l\rangle = \delta_{k,m}\delta_{l,m}\rho_{k,l}$. Summing over all sites $m$, the full evolution equation reduces to the explicit element-wise form \cite{Longhi2024}:
+\begin{equation}
+\frac{d\rho_{k,l}}{dt} = iJ \sum_{m=1}^{N} (\tau_{k,m}\rho_{m,l} - \rho_{k,m}\tau_{m,l}) - \gamma(1-\delta_{k,l})\rho_{k,l}.
+\label{eq:lindblad_elements}
+\end{equation}
+As Eq.~(\ref{eq:lindblad_elements}) demonstrates, the purely dissipative term strictly suppresses the off-diagonal coherences ($\rho_{k,l}$ for $k \neq l$), while the diagonal populations ($\rho_{k,k}$) are conserved in the absence of hopping.
+
+\subsection{Distance Metric and the Mpemba Effect}
+The essence of the Quantum Mpemba effect lies in anomalous relaxation dynamics: a state initially further from equilibrium reaches it faster than a state initially closer. To quantify this phenomenon, we require a rigorous geometric distance metric between the state $\hat{\rho}(t)$ and the stationary state $\hat{\rho}^{(S)}$.
+
+{
+Following standard information-theoretic approaches to open quantum systems, we measure the distance to \textcolor{green}{equilibrium using the quantum relative entropy}:
+\begin{equation}
+D(\hat{\rho}(t) || \hat{\rho}^{(S)}) = \operatorname{Tr}\{\hat{\rho}(t) \log \hat{\rho}(t)\} - \operatorname{Tr}\{\hat{\rho}(t) \log \hat{\rho}^{(S)}\}.
+\end{equation}
+We select the quantum relative entropy because it is a fundamental measure of distinguishability between quantum states and is \textcolor{green}{monotonically non-increasing} under completely positive trace-preserving (CPTP) maps \cite{vedral2002}. \textcolor{green}{It represents the quantum generalization of the classical Kullback-Leibler divergence.} While the choice of metric is not uniquely restricted, previous studies indicate that the Quantum Mpemba Effect is a robust dynamical feature qualitatively observable with alternative measures, such as the trace distance or the Hilbert-Schmidt distance \cite{Carollo2021}.
+
+For our model, the stationary state is the maximally mixed state within the single-photon subspace, corresponding to a uniform probability distribution across all $N$ graph nodes: $\hat{\rho}^{(S)} = \frac{1}{N} \hat{I}$. Given that $\operatorname{Tr}(\hat{\rho}) = 1$, substituting this into the relative entropy definition conveniently simplifies the expression to:
+\begin{equation}
+D(\rho(t)) = \log(N) + \operatorname{Tr}\{\hat{\rho}(t) \log \hat{\rho}(t)\}.
+\label{eq:metric}
+\end{equation}
+Here, the second term is the negative von Neumann entropy of the state~\cite{neumann}. Thus, for the dynamics considered here, the relative entropy and the von Neumann entropy-based distance are mathematically equivalent up to a constant shift. An intersection of the $D(\rho(t))$ trajectories for two distinct initial states serves as the unambiguous hallmark of the Mpemba effect.
+}
+\subsection{Liouvillian Vectorization}
+To solve Eq.~(\ref{eq:lindblad_elements}) and analyze the system's spectrum, we transition to the Liouville superoperator formalism~\cite{gyamfi2020}. The density matrix is mapped to a column vector via the vectorization operation $\operatorname{vec}(\cdot)$, denoted in double-ket notation as $\ketket{\rho} \equiv \operatorname{vec}(\rho) = [\rho_{1,1}, \rho_{2,1}, \dots, \rho_{N,N}]^\top$. \textcolor{green}{We further define the inverse operator $\operatorname{Mat} \equiv \operatorname{vec}^{-1}$, which restores an $N \times N$ matrix from its vectorized form.} The Liouville space is equipped with the Hilbert-Schmidt inner product $\langle\langle A | B \rangle\rangle = \operatorname{Tr}(A^\dagger B)$.
+
+The master equation transforms into a matrix differential equation $\frac{d}{dt}\ketket{\rho} = L\ketket{\rho}$, where the matrix representation $L$ of the Liouvillian superoperator $\mathcal{L}$ has dimensions $N^2 \times N^2$ and can be explicitly constructed by using the Kronecker product ($\otimes$). Separating the coherent and dissipative parts, we obtain the target matrix:
+\begin{equation}
+L = iJ(I \otimes \tau - \tau \otimes I) + L_D,
+\label{eq:L}
+\end{equation}
+where $I$ is the $N \times N$ identity matrix, and $L_D$ is a diagonal matrix with elements equal to $0$ for components corresponding to populations ($\rho_{k,k}$) and $-\gamma$ for coherences ($\rho_{k,l}$).\
+
+Throughout the subsequent numerical analysis, we define the time scale in units of the inverse hopping rate, effectively setting \textbf{$J=\frac{1}{2}$}. The dephasing rate is fixed at \textbf{$\gamma=0.1$}. This specific ratio ($\gamma/J = 0.2$) places the system in a weakly dissipative regime where coherent quantum dynamics and topological interference effects strongly dominate over local environmental decoherence.
+
+
+\textbf{}
+\section{Eigenstate Decomposition}
+As established, the dynamics equation is written as $\frac{d\rho}{dt} = \mathcal{L}
+(\rho) = L\cdot \ketket{\rho}$.\\
+This implies that its solution can be represented as:
+\begin{equation}
+\ketket{\rho(t)}=e^{Lt}\cdot \ketket{\rho(0)}
+\label{eq:solv_format}
+\end{equation}
+We analyze the system in the {non-Hermitian} diagonal basis of the operator $L$.\footnote{We assume that the Liouvillian superoperator $L$ is diagonalizable, which guarantees the existence of a complete biorthogonal basis of eigenmodes. While the non-Hermitian nature of $L$ allows for the existence of non-diagonalizable defective degeneracies (Exceptional Points), such points typically form a manifold of measure zero in the parameter space and are avoided in our generic parameter regime. Furthermore, the geometric symmetries of the square lattice induce standard (semi-simple) macroscopic degeneracies in the spectrum---such as the observed quadruplets of modes with identical complex decay rates---which our numerical solver naturally resolves by identifying a linearly independent basis spanning the degenerate subspaces.} This vectorization formalism allows for the spectral analysis of the Liouvillian superoperator.\cite{minganti2018}
+
+% \begin{otherlanguage}{russian}
+% \end{otherlanguage}
+To spectrally decompose the dynamics, we introduce a biorthogonal basis consisting of the right eigenvectors $v_k \ (\ketket{\rho_k})$ and the left eigenvectors $\langle\langle\sigma_k |$, which satisfy:
+\begin{equation}
+L\cdot v_k = \lambda_k \cdot v_k,
+\quad
+\langle\langle \sigma_j | \rho_k\rangle\rangle = \mathcal{N}_k \delta_{jk},
+\label{eq:eig_1}
+\end{equation}
+
+\textcolor{green}{where $\mathcal{N}_k$ is a complex normalization constant. While analytical treatments often set $\mathcal{N}_k = 1$, standard numerical eigensolvers normalize left and right eigenvectors independently. Therefore, we explicitly retain the factor $\mathcal{N}_k = \langle\langle\sigma_k | \rho_k\rangle\rangle$ in all subsequent projections.}
+\begin{equation}
+\ketket{\rho(0)}=\sum_k c_k v_k
+\label{eq:eig_decomp_0}
+\end{equation}
+Substituting this decomposition into the dynamics formula yields:
+\begin{equation}
+\ketket{\rho(t)}=\sum_kc_ke^{\lambda_k t }v_k
+\label{eq:eig_decomp}
+\end{equation}
+
+{We uniquely identify the stationary state of the system corresponding to $\lambda_0=0$. The associated right eigenvector is the stationary density matrix $v_0 = \ketket{\rho^{(S)}}$, and the corresponding left eigenvector is the identity operator. Due to the trace-preserving nature of the Lindblad evolution, the coefficient for the stationary mode is strictly $c_0 = 1$. }
+
+
+Furthermore, $e^{\operatorname{Re}\lambda_k t}$ represents the dissipative exponent in the decomposition; thus, $\operatorname{Re}\lambda_k < 0$ for non-trivial modes, corresponding to the decay rate. The term $e^{i\operatorname{Im}\lambda_k t}$ corresponds to the oscillation frequency $\omega_k = \operatorname{Im}\lambda_k$. \cite{kessler2012, minganti2018}
+
+\section{Lattice Investigation}
+We proceed with the investigation of the system using a small \textbf{square} lattice.\
+
+To this end, we construct mode population maps. The mode $k$, corresponding to the eigenvector $v_k$, is reshaped into matrix form via the $\operatorname{Mat}$ operator defined in Sec.~2.3. It is crucial to emphasize that $\operatorname{Mat}(v_k)$ does not represent a physical state, as it is not positive semi-definite and its trace is generally non-unity (or zero for decaying modes). Then, the populations (diagonal components) are extracted from the resulting matrix; each such component corresponds to a single lattice site:    
+\begin{equation}
+\vec{p}_k = \operatorname{Re}(\operatorname{diag}(\operatorname{Mat}(v_k))).
+\label{eq:p_k}
+\end{equation}
+The components of $\vec{p_k}$ are then mapped onto the \textbf{nodes of the original lattice}. In the diagram, color and brightness are normalized across the entire plot and illustrate the sign and magnitude, respectively.\\
+\textcolor{green}{
+Because the ideal square lattice possesses fundamental geometric symmetries (the $D_4$ point group), the Liouvillian superoperator commutes with the corresponding spatial parity operators. Consequently, the Liouvillian spectrum exhibits macroscopic degeneracies, with modes frequently emerging in multiplets (e.g., quadruplets) sharing identical decay rates $\operatorname{Re}(\lambda)$. Crucially, rather than returning arbitrary linear combinations within these degenerate subspaces, the numerical eigensolver resolves the simultaneous eigenstates of the Liouvillian and the spatial parity operators. This yields a deterministic, orthogonal basis composed of distinct macroscopic patterns with well-defined spatial parities (e.g., distinctly horizontal or vertical boundary modes).  }
+
+To systematically present these results without redundancy, the modes are organized into macro-groups $k'$ sharing identical relaxation rates. Fig.~\ref{fig:big_modes_map} illustrates this symmetry-resolved basis for a $10 \times 10$ lattice.
+
+\begin{figure}[H]
+    \centerline{\includegraphics[width=0.9\linewidth]{figures/10x10main_without_numbers}}
+    \caption{Node-wise distribution of Liouvillian eigenmode populations for a $10 \times 10$ regular lattice. The maps represent the real part of the diagonal components of the reshaped eigenvectors $\vec{p_k}$ (eq. \ref{eq:p_k}). Modes are organized into groups $k'$ sharing identical decay rates ($\operatorname{Re}(\lambda)$); for example, the group $k'=1$ corresponds to the degenerate subspace containing modes $k=1, \dots, 4$ due to lattice symmetry. Color intensity of each node is normalized globally by the maximum absolute population value, $\max |p_k|$, found among all non-trivial modes. Red denotes positive values, blue indicates negative values, with opaque colors corresponding to a relative amplitude of $\pm 1$ (i.e., $\pm 100\%$ of $\max |p_k|$).}
+    \label{fig:big_modes_map}
+\end{figure}
+
+
+\section{Analysis of Mode Structure}
+
+
+An extensive analysis of the spatial mode distributions reveals distinct geometric regularities, as exemplified by the $10 \times 10$ lattice in Fig.~\ref{fig:big_modes_map}. Rather than resembling random noise, the slow modes exhibit clear, macroscopic patterns governed by lattice symmetries. Examining the figure, we immediately observe that the modes in the slowest degenerate subspace ($k'=1$) are strongly localized at the lattice boundaries and corners. As the decay rate increases, these macroscopic features shift, giving rise to pronounced diagonal and anti-diagonal structural motifs (e.g., $k'=2$ and $k'=21$). Conversely, as the mode index increases further, the spatial distributions become less globally expressive. The higher-order modes lose their macroscopic structure, breaking down into fine-grained, small-scale spatial fluctuations (high spatial frequencies) that eventually resemble unstructured noise.
+
+This clear structural hierarchy---from macroscopic, boundary-localized patterns to fine-scale local fluctuations---provides a powerful heuristic principle for investigating the Quantum Mpemba effect.\footnote{As defined in Sec.~2.2, the Quantum Mpemba effect occurs when a state with a larger initial distance $D(\rho(0))$ relaxes to the stationary state faster than one with a smaller initial distance, leading to a crossing in their distance trajectories.} Initial states engineered to geometrically match the macroscopic "footprint" of specific slow modes are highly likely to excite those modes with extreme selectivity. Based on this physical insight, we empirically formulated a set of nine distinct initial states. These states serve as our "candidates" for demonstrating anomalous relaxation, as they are explicitly designed to couple predominantly into only a handful of targeted relaxation channels.
+
+The empirical candidate states for a square lattice are defined as follows:\\
+\begin{enumerate}
+    \item \textbf{Pure (Center):} A photon localized at a single central site (for even $N$, any of the four central sites), probing modes with central density.
+    \item \textbf{Mixed (Two Corners):} An equal mixture of states at two opposite corners, \textit{targeting the symmetries seen in $k'=1, 4, 5, 7, 22$ at fig.\ref{fig:big_modes_map}.}
+    \item \textbf{Mixed (Four Corners):} A statistical mixture of all four corner sites.
+    \item \textbf{Mixed (Diagonal):} An incoherent mixture of sites along the main diagonal, \textit{subspaces like $k'=2, 21$ at fig.\ref{fig:big_modes_map}.}
+    \item \textbf{Pure (Coherent Diagonal):} A coherent superposition supported entirely on the geometric main diagonal: $|\psi\rangle = \frac{1}{\sqrt{|S|}}\sum_{j\in S}|j\rangle$ with $S = \{(i, j) : i = j\}$.
+    \item \textbf{Mixed (Inner Corners):} A mixture of the four inner corners $\{(2, 2), (n-1, 2), (2, n-1), (n-1, n-1)\}$.
+    \item \textbf{Mixed (Top Edges):} A state distributed evenly along the top boundary edges. \textit{E.g. $k'=2,3,4,7$ at fig.\ref{fig:big_modes_map}}
+    \item \textbf{Mixed (Checkerboard):} A macroscopic checkerboard pattern (e.g., only "even" nodes occupied), \textit{specifically designed to interact with high-frequency modes similar to $k'=26$ at fig.\ref{fig:big_modes_map}.}
+    
+\end{enumerate}
+
+
+
+
+To verify our heuristic selection, we quantitatively evaluate the magnitude of the mode contribution to each state by computing the projection onto the corresponding Liouvillian eigenbasis:
+\begin{equation}
+c_k = \frac{\langle\langle\sigma_k | \rho(0) - \rho^{(S)}\rangle\rangle}{\langle\langle\sigma_k | \rho_k\rangle\rangle}
+\label{eq:c_k}
+\end{equation}
+
+Where: $ \ketket{\rho(0)}$ --- vectorized initial density matrix. $\ketket{\rho^{(S)}}$ --- vectorized stationary state density matrix. $\ketket{\rho_k}$ --- $k$-th right eigenvector of the Liouvillian ($v_k$). $\langle\langle\sigma_k | $ --- $k$-th left eigenvector of the Liouvillian ($w_k^\dagger$).\textcolor{green}{ The denominator $\langle\langle\sigma_k | \rho_k\rangle\rangle = \mathcal{N}_k$ is a normalization factor accounting for the lack of biorthonormality ($\mathcal{N}_k \neq 1$) in numerically generated eigenvectors.}
+
+In the right diagram (fig. \ref{fig:9states}), we plot the percentage contribution of the squared modulus of the complex expansion coefficient, $W_k=|c_k|^2$, as a function of the mode number. {The weights $W_k$ do not possess a direct probabilistic interpretation. Instead, they serve as a relative geometric measure of how strongly a specific transient channel is excited by the initial configuration.}
+
+%\begin{otherlanguage}{russian}
+%\end{otherlanguage}
+
+
+We decompose each of the 9 candidate initial states into the lattice eigenbasis to quantify their mode content. The projection coefficients $W_k$ indicate how strongly a specific mode participates in the relaxation process of a given state. The results, summarized in Fig.~\ref{fig:9states}, confirm that our empirically chosen states are indeed highly selective. \textcolor{green}{The bar charts reveal a striking sparsity: the states couple to specific individual modes rather than smearing uniformly across degenerate multiplets. This is a direct consequence of \textbf{symmetry selection rules}. Because the initial states exhibit distinct spatial symmetries (e.g., the fully symmetric "Four Corners"), their overlap integrals $c_k$ are strictly non-zero only for eigenmodes with matching spatial parity. Thus, initial spatial symmetry acts as a filter that deterministically isolates single relaxation channels.} This symmetry-driven extreme selectivity is the fundamental prerequisite for observing the trajectory crossings characteristic of the Quantum Mpemba effect.
+
+\begin{figure}[H]
+    \centerline{\includegraphics[width=1.0\linewidth]{figures/new_tabled_10x10_bar_chart_log_ENG_new_8STATES}}
+    \caption{Spectral decomposition of eight candidate initial states in a $10 \times 10$ lattice. Each \textbf{panel} analyzes a specific initial condition and consists of three elements: (1) a schematic illustration of the initial photon distribution (left), where yellow cells indicate nodes with a non-zero initial photon probability, serving as a binary visual guide independent of exact statistical weights or quantum phases; (2) a bar chart of the mode contribution weights $W_k=|c_k|^2$ (eq. \ref{eq:c_k}) plotted on a \textbf{logarithmic scale} (top right); and (3) spatial population maps of the three dominant eigenmodes providing the largest contribution to the expansion (bottom right). Notably, for the coherent diagonal state (panel 5), the dominant contributions arise from very high-order modes whose local populations fall below the visual color scale threshold, rendering their maps effectively blank (indicated by the  \textit{<}\textit{<0.01} label).}
+    \label{fig:9states}
+\end{figure}
+To avoid a misleadingly sparse appearance in linear scale (where the dominant bar masks the remaining weights), we present only the logarithmic visualization. The log scale highlights the intended point: the selected initial states have a strongly \emph{mode-selective} decomposition while still exhibiting nonzero projections onto multiple faster modes.\
+
+\subsection{Simulation}
+Subsequently, we performed a time-evolution simulation for these states to verify the existence of the predicted effect. As shown in Fig.~\ref{fig:simulation_lattice_10x10}, the trajectories for specific pairs cross, confirming the phenomenon. This behavior is robust and has been observed across a range of square lattice sizes ($n\in\{5,\dots,11\}$).
+
+
+\begin{figure}[H]
+    \centerline{\includegraphics[width=1\linewidth]{figures/9states_modes_simulation_line_10x10_with_selection_ENG}}
+    \caption{Relaxation dynamics of the $10\times 10$ lattice system shown as the time evolution of the distance to equilibrium $D(\rho(t))$ for eight distinct initial states (see Fig.~\ref{fig:9states}). The crossing of trajectories (bold) represents the Mpemba effect, which is most clearly observed for state pairs (3 and 5) and (4 and 5).}
+    \label{fig:simulation_lattice_10x10}
+\end{figure}
+
+\textcolor{green}{\section{Network Rewiring}}
+We now modify the lattice structure by randomly rewiring a fraction of the edges. This process involves switching edge endpoints, thereby conserving the total number of edges in the system. The topology is governed by the parameter $p \in [0, 1]$, representing the rewiring probability for each initial edge. For an open $n \times n$ square lattice, the exact number of undirected edges is $E = 2n(n-1)$. Consequently, the expected number of rewired edges is precisely $\langle E_{\mathrm{rew}} \rangle = 2n(n-1)p$.
+
+In the context of open quantum systems, network fragmentation produces multiple degenerate stationary states, which invalidates the spectral decomposition of the Liouvillian. Therefore, we must strictly enforce the global connectivity of the network. We achieve this through a Monte Carlo rejection sampling procedure, detailed in Algorithm~\ref{alg:rewiring}.
+
+\begin{algorithm}[H]
+\caption{Connectivity-Guaranteed Edge Rewiring}
+\label{alg:rewiring}
+\begin{algorithmic}[1]
+\Require Lattice dimension $n$, rewiring probability $p$, optional PRNG $seed$
+\Ensure Connected adjacency matrix $\tau$
+\State Initialize pseudo-random number generator with $seed$ (if provided)
+\State $connected \gets \mathbf{false}$
+\While{not $connected$}
+    \State $\tau \gets \text{generate\_base\_grid}(n \times n)$
+    \State $\mathcal{E} \gets \text{list of all edges in } \tau$; Randomly shuffle $\mathcal{E}$
+    \For{each edge $(u, v) \in \mathcal{E}$}
+        \If{$\operatorname{rand}(0, 1) < p$}
+            \State Select node $X$ uniformly from $\{u, v\}$
+            \State Let $Y$ be the other node: $Y \gets \{u, v\} \setminus \{X\}$
+            \State $\mathcal{V}_{\text{valid}} \gets \text{all nodes} \setminus (\{X, Y\} \cup \text{neighbors of } X \text{ in } \tau)$
+            \If{$\mathcal{V}_{\text{valid}} \neq \emptyset$}
+                \State Select target $W$ uniformly from $\mathcal{V}_{\text{valid}}$
+                \State Remove edge $(X, Y)$ and add edge $(X, W)$ to $\tau$
+            \EndIf
+        \EndIf
+    \EndFor
+    \If{$\text{check\_connectivity\_BFS}(\tau) == \mathbf{true}$}
+        \State $connected \gets \mathbf{true}$
+    \EndIf
+\EndWhile
+\State \Return $\tau$
+\end{algorithmic}
+\end{algorithm}
+
+To prevent the creation of self-loops and multi-edges, target nodes are restricted to the set $\mathcal{V}_{\text{valid}}$. If no valid targets remain for a selected edge, its rewiring is simply bypassed (lines 11--14). Disconnected realizations are discarded via Breadth-First Search (BFS) validation (line 16). Finally, to guarantee the exact reproducibility of the representative single-graph spatial maps presented in subsequent sections, the generator is initialized with a fixed seed. For statistical ensemble averaging, the seed varies to ensure independent sampling.
+
+\vspace{1em}
+\textit{In the following sections, we focus on $10 \times 10$ lattices}
+
+\subsection{Classical Network Analysis}
+
+A standard method for investigating phase transitions (or smoother crossovers) in networks involves analyzing the average shortest path length (averaged over all node pairs) as a function of the disorder parameter---in our case, the rewiring probability $p$ \cite{barthelemy}. For a more comprehensive analysis of such transitions and the "small-world" property, see \cite{newman, kleinberg}.
+
+We plot this dependence for a $10 \times 10$ lattice across different scales. To faithfully reproduce the canonical Watts--Strogatz crossover~\cite{watts1998} for this specific macroscopic metric, the strict BFS connectivity filter (Algorithm~\ref{alg:rewiring}) was relaxed. The goal of this figure is to identify the crossover region in $p$ that will later be compared with spectral changes:
+\begin{figure}[H]
+\centerline{
+\begin{subfigure}{0.37\linewidth}
+    \includegraphics[width=1\linewidth]{figures/log10x10_p_L}
+    \caption{full scale}
+\end{subfigure}
+\begin{subfigure}{0.37\linewidth}
+    \includegraphics[width=1\linewidth]{figures/log10x10_p_L_SCALED}
+    \caption{crossovering gap}
+\end{subfigure}
+}
+\caption{Average shortest-path length versus rewiring probability $p$ (in log. scale) for a $10\times 10$ lattice, shown in two scalings. The smooth crossover indicates the onset of the small-world regime, i.e., the range of $p$ where adding a small fraction of long-range links sharply reduces typical graph distances.}
+\end{figure}
+We observe a smooth crossover in the range $p \in [0.01, 0.1].$
+
+\section{Mode Analysis for Disordered Lattices}
+We now turn to the analysis of disordered lattices obtained via the rewiring model described above, where the network topology is parameterized by the lattice size and the rewiring probability $p \in [0, 1]$. Our goal  here is to understand how the spectral and spatial properties of the Liouvillian eigenmodes evolve as the network transitions from a regular lattice to a disordered graph. 
+
+\subsection{Spectral Analysis}
+
+To establish a baseline for our spectral analysis, Fig.~\ref{fig:rewired_spectra} presents representative Liouvillian eigenvalue spectra across several orders of magnitude of the rewiring probability $p$. This progression illustrates how increasing topological disorder breaks the geometric symmetries of the lattice and modifies the spectral structure near the origin, which governs the long-time relaxation dynamics of the system.
+
+
+
+
+\begin{figure}[H]
+\centerline{
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/with_examples_1}
+\end{subfigure}
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/with_examples_2}
+\end{subfigure}
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/with_examples_3}
+\end{subfigure}
+}
+\caption{Representative Liouvillian spectra for rewired $10\times 10$ lattices at increasing disorder levels ($p=0$, $p=0.1$, $p=0.3$). The regular lattice exhibits a structured spectrum with degeneracies tied to symmetry; rewiring lifts degeneracies and progressively smears spectral branches. The eigenvalues closest to zero (rightmost points) correspond to the slowest relaxation modes.}
+\label{fig:rewired_spectra}
+\end{figure}
+
+
+\subsection{Analysis of Slow Modes}
+We observe that the first few modes, located closest to zero on the real axis, are the most indicative of the system's long-term dynamics. Note that while these are conventionally the "slowest" decaying modes, they determine the convergence speed. 
+
+To investigate the system's response to disorder, we track the behavior of the first three non-trivial modes (characterized by purely real eigenvalues, $\operatorname{Im} \lambda_k = 0$) across varying rewiring probabilities $p$. The eigenvalues are averaged over 30 independent graph realizations for each $p$. The dependence of the first mode's relaxation rate on $p$ is visualized at Fig.~\ref{fig:modes_log_scale}.1.\
+
+For a more detailed analysis across multiple orders of magnitude of $p$, we present the behavior of all three slow modes, as well as the spectral gap $\Delta$, on a logarithmic scale in Fig.~\ref{fig:modes_log_scale}.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\linewidth}
+    \includegraphics[width=1\linewidth]{figures/mode_1_p_log_ENG}
+    \caption{mode $\lambda_1$}
+\end{subfigure}
+\begin{subfigure}{0.48\linewidth}
+    \includegraphics[width=1\linewidth]{figures/mode_2_p_log_ENG}
+    \caption{mode $\lambda_2$ }
+\end{subfigure}
+
+\vspace{1em}
+
+\begin{subfigure}{0.48\linewidth}
+    \includegraphics[width=1\linewidth]{figures/mode_3_p_log_ENG}
+    \caption{mode $\lambda_3$}
+\end{subfigure}
+\begin{subfigure}{0.48\linewidth}
+    \includegraphics[width=1\linewidth]{figures/gap_p_log_ENG}
+    \caption{gap $Re(\lambda_1-\lambda_2)$ }
+\end{subfigure}
+
+\caption{Dependence of the relaxation rates on the rewiring probability $p$ (in log. scale) for a $10 \times 10$ lattice. Panels display the real parts of the eigenvalues $\operatorname{Re}(\lambda_k)$ for the three nontrivial slowest modes ($k=1, 2, 3$). Last panel illustrates the spectral gap $\Delta = \operatorname{Re}(\lambda_1) - \operatorname{Re}(\lambda_2)$.}
+\label{fig:modes_log_scale}
+\end{figure}
+We observe the following features, which are particularly evident in the first mode. The relaxation rate of the slowest mode remains constant up to $p \approx 0.005$. Beyond this threshold, $|\operatorname{Re}(\lambda_1)|$ decreases (i.e., the eigenvalue moves closer to zero on the negative real axis), corresponding to a \textbf{slowing down} of the first mode as the network approaches a random configuration. This may appear \textbf{counter-intuitive}, since, on average, a small-world network relaxes to equilibrium faster. However, individual configurations hosting significantly slower modes emerge with increasing probability, and it is this effect that we observe. 
+\textcolor{green}{Rather than constituting the Mpemba effect itself---which strictly refers to the anomalous crossing of relaxation trajectories for specific initial states---this spectral phenomenon represents a \textbf{topology-induced slow-mode localization}. By structurally isolating the slowest relaxation channels, this topological transition geometrically assists in the preparation of initial states that bypass these slow channels, thereby facilitating what we term the \textbf{topologically assisted Quantum Mpemba effect}.\\
+We also note that the error bars begin to increase sharply at the same threshold $p \approx 0.005$, indicating a change in the system's dynamical regime.}
+
+We confirmed the presence of a similar effect for different dimensions of the square lattice. (supplemental)
+
+
+
+
+\subsection{Eigenvector Analysis}
+
+We consider the Inverse Participation Ratio (IPR) parameter \cite{farkas},
+which characterizes the degree of spatial localization of the eigenvectors. In the mode matrix $\operatorname{Mat}(v_k)$, we retain only the diagonal components, as we are concerned solely with populations.
+We then calculate:
+\begin{equation}
+IPR(k)=\frac{\sum_{i=1}^N |\rho_{k_{ii}}|^4}{(\sum_{i=1}^N |\rho_{k_{ii}}|^2)^2}
+\label{eq:IPR}
+\end{equation}
+Here, the denominator serves as a normalization factor, ensuring that the IPR value ranges from $1/N$ (for a state uniformly distributed across all sites) to $1$ (for a state perfectly localized at a single site). Consequently, a decrease in this parameter corresponds to a greater delocalization of the mode. To quantitatively trace the structural evolution of the states, we plot the average IPR for the first three non-trivial modes as a function of the rewiring probability $p$, as shown in Fig.~\ref{fig:ipr_graphs}.
+
+\begin{figure}[H]
+\centerline{
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/10x10_IPR_graph_mode_k_1}
+    \caption{localization of $\lambda_1$ (IPR)}
+\end{subfigure}
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/10x10_IPR_graph_mode_k_2}
+    \caption{localization of $\lambda_2$ (IPR)}
+\end{subfigure}
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/10x10_IPR_graph_mode_k_3}
+    \caption{localization of $\lambda_3$ (IPR)}
+\end{subfigure}
+}
+\caption{Dependence of the IPR, defined in Eq.~(\ref{eq:IPR}), on the rewiring probability $p$ (log. scale) for the three slowest relaxation modes ($k=1, 2, 3$) in a $10 \times 10$ lattice. The plotted values represent statistical averages over generated network realizations, with error bars. Notice the stark contrast in both scale and qualitative behavior: while the first mode ($k=1$) exhibits a pronounced increase in localization within the crossover regime, the subsequent modes ($k=2, 3$) remain significantly more delocalized and follow a standard trend toward homogeneity.}
+\label{fig:ipr_graphs}
+\end{figure}
+It is worth noting the distinct behavior of the first mode and the scale of the axes in Fig.~\ref{fig:ipr_graphs}: the first mode becomes approximately three times more localized than the higher-order modes. We also observe a clear regime shift corresponding to the same small-world transition regions identified earlier.
+
+\subsection{Community Structure Analysis}
+We employ a more advanced method to analyze mode localization.
+The internal structure of each generated network is identified using the \textbf{Louvain method}, a popular and efficient algorithm \cite{blondel}. It iteratively optimizes the modularity metric by grouping nodes to maximize the density of edges within communities and minimize edges between them. This results in a partition of all $N$ nodes into $M$ non-overlapping communities $C_1, \ C_2, \ \ldots\ C_m$.
+
+For each Liouvillian eigenmode, we measure its concentration within the identified communities by introducing the \textbf{Overlap coefficient}.
+As established previously, the physical meaning of population distribution is carried by the diagonal of the reconstructed mode matrix $\operatorname{Mat}(v_k)$. We define the ``mass'' of the mode at site $i$ as $|\operatorname{Mat}(v_k)_{ii}|^2$.
+The total ``mass'' of the mode is normalized to unity: 
+\begin{equation}
+TotalMass(k)=\sum_{i=1}^N|Mat(v_k)_{ii}|^2
+\label{eq:total_mass}
+\end{equation}
+
+The Overlap of mode $k$ with community $C_m$ is defined as the fraction of its total mass located within that community:
+\begin{equation}
+Overlap(k, C_m)=\frac{\sum_{i \in C_m}|Mat(v_k)_{ii}|^2}{TotalMass(k)} \ \ \in [0,1]
+\label{eq:over_lap}
+\end{equation}
+\begin{itemize}
+    \item If $\max(\operatorname{Overlap}(k)) \approx 1$, the mode is almost entirely contained within a single community. \textbf{It is structurally localized.}
+    \item If $\max(\operatorname{Overlap}(k))$ is small (e.g., close to $1/M$, where $M$ is the number of communities), the mode is distributed across the entire network.
+\end{itemize}
+To observe the evolution of this structural localization, we calculate the maximum Overlap for the first three non-trivial modes across different rewiring probabilities $p$. The statistically averaged results are presented in Fig.~\ref{fig:community_overlap}.
+\begin{figure}[H]
+\centerline{
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/10x10_community_analyse_mode_k_1_ENG}
+    \caption{localization of $\lambda_1$}
+\end{subfigure}
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/10x10_community_analyse_mode_k_2_ENG}
+    \caption{localization of $\lambda_2$}
+\end{subfigure}
+\begin{subfigure}{0.32\linewidth}
+    \includegraphics[width=1\linewidth]{figures/10x10_community_analyse_mode_k_3_ENG}
+    \caption{localization of $\lambda_3$}
+\end{subfigure}
+}
+\caption{Dependence of the maximum community Overlap coefficient, defined in Eq.~(\ref{eq:over_lap}), on the rewiring probability $p$ for the three slowest modes ($k=1, 2, 3$) in a $10 \times 10$ lattice. Values are averaged over multiple graph realizations, with error bars indicating the standard deviation. While higher-order modes ($k=2, 3$) exhibit a transient increase in overlap during the small-world crossover before eventually delocalizing, the first mode ($k=1$) shows a monotonic increase, highlighting its structural confinement within specific topological communities.}
+\label{fig:community_overlap}
+\end{figure}
+
+As depicted in Fig.~\ref{fig:community_overlap}, for the regular lattice structure ($p \to 0$), the modes are distributed uniformly across the network, and the community overlap is minimal. We anticipate that during the transition period, large clusters will form: the network locally "breaks down" and connects to distant nodes while retaining local density due to the initial lattice structure. Thus, \textbf{an increase in overlap is expected} during this crossover. Subsequently, as $p$ approaches $1$ and the network becomes nearly random (destroying distinct community structures), we \textbf{expect a decrease} in the overlap. This predicted non-monotonic behavior---a transient peak followed by a decline---is indeed precisely what is observed for modes \textbf{k=2 and k=3}.\
+
+However, the first mode behaves \textbf{differently}, indicating the re-emergence of the previously observed \textbf{topology-induced slow-mode localization}.\\
+The overlap for the first mode grows monotonically and then reaches a plateau. Rather than being a strictly quantum anomaly, this behavior represents a fundamental feature of the Liouvillian dynamics in the present dephasing quantum-walk model, sharing deep structural similarities with the localization of slow relaxation modes (e.g., the Fiedler vector) in classical diffusion on heterogeneous networks. We observe that as $p$ increases, despite the general delocalizing trend of the small-world crossover, \textbf{topological traps and distinct hubs emerge}; the modes localized around these structures "ascend" and become the slowest decay channels of the system.
+
+The observed spatial localization of the slowest mode significantly affects the system's relaxation dynamics. According to the theory of the spectral Mpemba effect, a condition for accelerated relaxation is the ability to prepare an initial state that weakly excites (or "darkens") the slowest mode while strongly interacting with faster modes.\\
+
+For delocalized modes (as in a regular lattice), such "darkening" requires complex interference tuning of amplitudes across the entire network. However, the localization of mode $v_1$ for $p > 0$ allows for the \textbf{geometric construction of excitation}:\\
+if a mode is concentrated in a small region, the majority of network nodes become "dark" to it. To formalize this connection between topology and excitation selectivity, we must \textbf{shift from analyzing the internal mode structure to analyzing their response to local perturbations}.
+
+\subsection{Hypothesis on State Brightness}
+The brightness of a mode $v_k$ is not determined by the mode alone; it is a \textbf{relational property} that characterizes the coupling of the mode to a specific class of initial states (or perturbations).
+
+
+Since we work with the system's initial states, we select the class of fully \textbf{localized pure states} $\rho_i(0)=|i\rangle\langle i|$, where $i\in \{0, \dots, N-1\}$, as the fundamental basis of perturbations.
+\\
+We then define \textbf{local excitability} $B(k, i)$ for a specific node $i$:
+\begin{equation}
+    B(k, i) \equiv W_k\left(\text{for } |\rho_i(0)\rangle\rangle\right) = \left| \frac{\langle\langle\sigma_k | \rho(0) - \rho^{(S)}\rangle\rangle}{\langle\langle\sigma_k | \rho_k\rangle\rangle} \right|^2
+\end{equation}\label{local_excitability}
+based on Eq. (\ref{eq:c_k}).\\
+Since for $k > 0$ the left eigenvector $\langle\langle\sigma_k|$ is orthogonal to the right stationary state eigenvector $\ketket{\rho^{(S)}}$ (i.e., $\langle\langle\sigma_k|\rho_0\rangle\rangle=0$), the formula for non-trivial modes simplifies to:
+    \begin{equation}
+    B(k, i) = \left| \frac{\langle\langle\sigma_k | \rho_i(0)\rangle\rangle}{\langle\langle\sigma_k | \rho_k\rangle\rangle} \right|^2, \quad \text{for } k > 0
+    \label{eq:B_k_i}
+    \end{equation}
+
+We define "dark" and "bright" modes as follows:
+\begin{itemize}
+    \item A mode $v_k$ is termed \textbf{globally bright} if its local excitability $B(k, i)$ is significant for the majority of sites $i$.
+    \item A mode $v_k$ is termed \textbf{geometrically dark} if its local excitability $B(k, i)$ is significant only for a small subset of sites and negligible for all others.
+\end{itemize}
+
+The previous results (increase in IPR and MaxOverlap for $\lambda_1$) allow us to formulate the following \textbf{hypothesis}:
+\begin{itemize}
+    \item The slowest mode $v_1$ undergoes a transition from globally bright to geometrically dark for $p > 0$, as its spatial localization implies it can be efficiently excited only from a small region of the network.
+    \item Faster modes ($v_k$ for $k \geq 2$), remaining relatively delocalized, retain their globally bright character.
+\end{itemize}
+
+We verify this by constructing excitability maps for the modes of interest.
+
+\subsection{Visualization of Excitability Maps}
+As evidenced by the preceding analyses of the spectral gap (see fig \ref{fig:modes_log_scale}), IPR (see Fig.~\ref{fig:ipr_graphs}), and community overlap (see Fig.~\ref{fig:community_overlap}), the system undergoes a pronounced structural crossover, with key metrics exhibiting extrema or changing their dependence trends within the $p \sim 0.1 - 0.2$ range. Consequently, we fix the rewiring probability at $p=0.15$ for our subsequent spatial visualization, as it consistently captures this transition region where the topological localization of the slowest mode is most distinctly manifested.\
+
+To visualize the spatial structure, we construct a local excitability map by calculating the value $B(k, i)$ for each site $i$ according to Eq.~(\ref{local_excitability}). Since the specific network topology is random for a fixed rewiring probability $p$, we generate a statistical ensemble of graph realizations. From this set, a ``typical representative'' is selected. As the selection criterion, we use the median average shortest path length $L_{avg}$ of the ensemble. This specific metric is chosen not because of any \textit{a priori} correlation with quantum relaxation dynamics, but because it is a fundamental macroscopic descriptor of networks. By targeting the $L_{avg}$, we ensure that the selected graph possesses a generic, statistically representative topology.
+
+\begin{figure}[H]
+    \centerline{\includegraphics[width=0.75\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part1}}
+    \caption{Statistical distribution of the average shortest path length ($L_{avg}$) used to select a representative network topology at a fixed $p=0.15$. The horizontal axis represents the topological metric $L_{avg}$, the vertical axis displays the frequency of occurrences across an ensemble of randomly generated graph realizations (ensemble size $N = 2000$). The red dashed vertical line marks the median of the distribution. Selecting the network realization closest to this median ensures that the subsequent spatial excitability analysis (Fig.~\ref{fig:excib_maps_represent}) is performed on a typical architecture, thereby avoiding statistically anomalous configurations.}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centerline{\includegraphics[width=0.75\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part2}}
+    \caption{Spatial maps of local excitability $B(k, i)$ (Eq.\ref{eq:B_k_i}) for the first three non-trivial relaxation modes ($k=1, 2, 3$) on a rewired $10 \times 10$ lattice ($p = 0.15$). Each lattice node represents a waveguide site. The color scale and marker size quantitatively encode the relative magnitude of the excitability: bright (yellow/red) nodes act as topological hubs that strongly couple to the respective mode upon local single-photon injection, whereas dark (purple/black) nodes represent topological voids that are effectively decoupled from the mode.}
+    \label{fig:excib_maps_represent}
+\end{figure}
+
+
+
+
+\section{Heuristic Algorithm for Generating Initial States with a Pronounced Mpemba Effect}
+
+As established in the previous section, topological disorder can induce a pronounced spatial localization of the slowest relaxation mode ($k=1$). This structural confinement physically implies that the fundamental mode becomes geometrically 'dark' to local excitations originating from the vast majority of the network nodes. Based on this observation, it is possible to bypass complex interference tuning and construct initial states with tailored relaxation rates using a purely geometric approach. 
+
+In this section, we propose a deterministic heuristic algorithm that leverages the local excitability map $B(1,i)$ to construct a pair of diagonal (incoherent) initial density matrices exhibiting a pronounced Quantum Mpemba Effect. \textcolor{dark-green}{We present this algorithm as a proof-of-concept demonstration.} Rather than seeking the exact mathematical cancellation of the slowest mode projection ($c_1 \equiv 0$, which defines the strict 'Strong Mpemba' condition), our objective is to engineer a macroscopic, \textcolor{dark-green}{physically observable} effect. For illustrative purposes, all algorithmic steps and benchmarks are presented for a selected representative $6 \times 6$ network at a rewiring probability $p=0.15$.
+
+To examine the Mpemba effect, we will name the state that is initially further from equilibrium as 'hot', since it relaxes more quickly, and the state that is initially closer to equilibrium but relaxes more slowly as 'cold'.
+
+\subsection{Step 1: Spectral analysis}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/Step1_Three_Modes}
+    \caption{Spatial maps of local excitability $B(k, i)$ for the first three non-trivial relaxation modes on the selected $6 \times 6$ test lattice ($p = 0.15$). The color mapping and node representation conventions strictly follow those detailed in Fig.~\ref{fig:excib_maps_represent}.  Note the pronounced spatial localization of the fundamental mode ($k=1$), which provides the geometric basis for our state-engineering algorithm.}
+    \label{fig:step1}
+\end{figure}
+The foundation of our algorithm is the spatial inhomogeneity of the system's response to local injection. As derived in Eq.~(\ref{local_excitability}), the excitability metric $B(k,i)$ translates the abstract bi-orthogonal eigenvectors into a physical map, revealing how strongly a single photon injected at site $i$ will excite the $k$-th relaxation channel. 
+
+Figure~\ref{fig:step1} illustrates these spatial excitability profiles. The maps reveal a critical structural feature: the fundamental mode ($k=1$) exhibits extreme spatial localization, fragmenting the network into a few highly sensitive 'bright' hubs and a large 'dark' background of decoupled sites. Our state-engineering protocol exclusively relies on the excitability map of this slowest mode.
+
+\subsection{Step 2: Selection hot state (Dark node)}
+To construct the 'hot' state, we find the darkest node on the map (the node that the least excites the first, slowest mode) and inject a photon into this node. The density matrix of the 'hot' state is a matrix with a single unit on the diagonal and all other elements equal to zero.
+
+\subsection{Step 3: Selection cold state (Mix of bright nodes)}
+
+To construct the 'cold' state, we select an integer $M$ ($2 \le M \le n^2/2$) and identify the $M$ brightest nodes on the excitability map. The 'cold' state is then formed as an incoherent, equally weighted statistical mixture of these nodes: $\rho_{cold} = \frac{1}{M}\sum_{j \in \text{bright}}|j\rangle\langle j|$.
+
+To determine the optimal number of bright nodes $M$, we evaluate the candidate mixtures using a heuristic objective function:
+\begin{equation}
+    Score = \abs{\frac{c_1^{cold}}{c_1^{hot}}}^2\cdot\abs{D_{hot}-D_{cold}}.
+\end{equation}
+This scoring formula acts as a balance between two fundamental requirements for a macroscopic QME. The first multiplier (the ratio of squared projections) enforces the spectral condition: the 'cold' state must strongly excite the slowest relaxation channel, while the 'hot' state remains essentially 'dark' to it. The second multiplier acts as a crucial geometric regularizer. It ensures that the selected states start sufficiently far apart in the relative entropy metric space ($\Delta D(0) > 0$), preventing the algorithm from converging to trivially close states that would yield physically meaningless, instantaneous micro-crossings.
+
+\begin{figure}[H]
+\centerline{
+\begin{subfigure}{0.45\linewidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/final_hot_state}
+    \caption{"Hot" state (Darkest node)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\linewidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/final_cold_state}
+    \caption{"Cold" state ($M=3$ brightest nodes)}
+\end{subfigure}
+}
+\caption{Deterministic selection of the Mpemba pair based on the $k=1$ excitability map from Fig.~\ref{fig:step1}. \textbf{(A)} The localized "hot" state is placed at the darkest node (red outline), minimizing its interaction with the slow mode. \textbf{(B)} The mixed "cold" state is distributed across the $M=3$ brightest nodes (blue outlines), identified as the optimal combination maximizing the heuristic score.}
+\label{fig:step_hot_cold_selection}
+\end{figure}
+
+\subsection{Monte Carlo Benchmark and Applicability Limits}
+\textcolor{dark-green}{Defining a universal, cross-system metric for the 'strength' of the QME remains a non-trivial challenge in open quantum systems, since absolute trajectory crossing times ($t^*$) are highly sensitive to the initial distance gap between states.} Since evaluating absolute optimality is hindered by this dependence, we evaluated the efficacy of the proposed deterministic algorithm by benchmarking it against a random Monte Carlo search within the fixed $6 \times 6$ network topology.
+
+To ensure a physically meaningful comparison, we generated an ensemble of 10,000 randomly selected pairs of diagonal density matrices. The populations of these random states were sampled from a uniform Dirichlet distribution, $p \sim \mathrm{Dirichlet}(1, \dots, 1)$, ensuring unbiased coverage of the probability simplex. Furthermore, to filter out trivial micro-crossings caused by state pairs starting infinitesimally close to each other, we applied a gap filter: the initial relative entropy gap of a random pair was required to be at least 10\% of the gap engineered by our algorithm. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/alg_compare}
+    \caption{Statistical validation of the deterministic algorithm. The histogram displays the distribution of crossing times ($t^*$) for 10,000 randomly generated valid pairs of diagonal initial states on the $6 \times 6$ network ($p=0.15$). The vertical dashed red line marks the extremely short crossing time ($t^* = 44.72$) achieved by the deterministically engineered pair from Fig.~\ref{fig:step_hot_cold_selection}. The algorithmic pair drastically outperforms the vast majority of random configurations, sitting in the extreme left tail of the distribution.}
+    \label{fig:algorithm_test}
+\end{figure}
+
+As illustrated by the histogram in Fig.~\ref{fig:algorithm_test}, the deterministically engineered pair significantly outperforms the random search, positioning the crossing time in the extreme lower (fastest) percentile of the distribution. \textcolor{dark-green}{Varying the threshold of the gap filter between 5\% and 20\% confirmed that the percentile rank of the algorithmic pair remains stable, verifying the robustness of this comparative evaluation.}
+
+\textcolor{dark-green}{Finally, we note the physical limits of applicability for the proposed proof-of-concept heuristic. The current algorithm relies exclusively on the spatial excitability structure of the single fundamental mode $v_1$. Consequently, its validity is contingent upon the network possessing a strongly localized slowest mode that is separated from the rest of the spectrum by a distinct eigenvalue gap. In arbitrary random ensembles, topological fluctuations can lead to quasi-degeneracies ($\lambda_1 \approx \lambda_2$) or delocalization of the fundamental mode, which would necessitate accounting for higher-order relaxation channels. The generalization of this geometric approach to multi-mode heuristics across broad topological ensembles remains a subject for future investigation.}
+% \section{Future Work}
+
+% \begin{itemize}
+%     \item Explain the absence of a complex component in the newly emerging modes.
+%     \item Measure larger networks to verify the persistence of the effects.
+%     \item Investigate symmetric modes more closely, specifically the differences between even and odd lattices.
+%     \item Analyze more than the first three modes and visualize the data to clearly track the emergence of the "topological effect".
+%     \item Construct physical states for the new effect and identify the Mpemba effect.
+%     \item Implement more complex rewiring models.
+%     \item Perform analysis via diagram superposition.
+% \end{itemize}
+
+
+\section{Conclusion}
+
+We have presented a systematic study of the Quantum Mpemba effect
+in networks of coupled optical waveguides, progressing from regular
+square lattices to topologically disordered graphs.
+
+For regular lattices, the spectral decomposition of the Liouvillian
+superoperator reveals that the relaxation eigenmodes possess
+well-defined macroscopic geometric patterns dictated by lattice
+symmetries. Exploiting this spatial regularity, we constructed a set
+of candidate initial states with highly selective mode content and
+confirmed that specific pairs of these states exhibit trajectory
+crossings in the relative-entropy distance to equilibrium---the
+hallmark of the Mpemba effect. The effect was observed robustly for
+square lattices of sizes $n = 5$ through $n = 11$.
+
+Introducing topological disorder via a Watts--Strogatz-type
+edge-rewiring procedure, we tracked the evolution of the relaxation
+spectrum across the lattice-to-random crossover. Three key findings
+emerged. First, the relaxation rate of the slowest mode
+$\mathrm{Re}\,\lambda_1$ decreases in absolute value with
+increasing rewiring probability beyond the small-world threshold
+$p \approx 0.005$, indicating that certain disordered configurations
+host anomalously slow relaxation channels---a spectral phenomenon we identify as topology-induced slow-mode localization. Second, the Inverse Participation
+Ratio and the community-overlap analysis demonstrate that the slowest
+mode undergoes a pronounced spatial localization, concentrating within
+a small subset of network nodes, while the second and third modes
+remain comparatively delocalized. Third, this localization asymmetry
+enables a natural classification of modes into ``bright'' (globally
+excitable) and ``dark'' (geometrically decoupled from most sites),
+providing a direct geometric route to engineering initial states with
+suppressed overlap with the slowest relaxation channel.
+
+Building on these observations, we formulated a deterministic
+heuristic algorithm for constructing pairs of initial diagonal density
+matrices that maximize the Mpemba effect on a given disordered
+network. The algorithm places the ``hot'' (far-from-equilibrium,
+fast-relaxing) state at the node with the smallest local excitability
+for the first mode, and distributes the ``cold''
+(closer-to-equilibrium, slow-relaxing) state across the $M$ brightest
+nodes, with $M$ optimized via a scoring function that balances the
+projection ratio and the initial distance gap. A benchmark against
+$10\,000$ randomly sampled diagonal state pairs on a $6 \times 6$
+lattice at $p = 0.15$ confirmed that the algorithmically engineered
+pair achieves a crossing time $t^{*}$ in the extreme lower percentile
+of the distribution, validating the approach as a proof of concept.
+
+Several directions for future work merit attention.
+The present analysis is restricted to incoherent (diagonal) initial
+states; extending the algorithm to coherent superpositions may
+further amplify the effect by exploiting off-diagonal interference.
+Scaling the approach to larger networks ($n \gg 10$) will require
+efficient spectral methods or variational approximations, since the
+Liouvillian dimension grows as~$N^2$.  It would also be valuable to
+investigate alternative graph families---such as scale-free,
+hierarchical, or empirical real-world networks---to assess the universality of the topology-induced mode localization.  Finally,
+the connection between the topology-induced Mpemba effect and Liouvillian exceptional points, recently highlighted in the context
+of trapped-ion experiments~\cite{Zhang2025}, deserves further theoretical
+exploration in the network setting.  From an experimental
+perspective, the model maps directly onto photonic mesh lattices with
+controllable dephasing~\cite{Longhi2024,Longhi2024bosonic}, suggesting that the predicted effects
+are within reach of current integrated-photonic and fiber-loop
+platforms.
+
+\backmatter
+
+\bmhead{Acknowledgements}
+The work was financially supported by [Prioritet 2030] (project No. ...).
+
+\section*{Declarations}
+\textbf{Conflict of interest.} The authors declare no conflict of interest.
+
+\bibliography{refs}
+
+\end{document}
