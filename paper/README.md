@@ -7,28 +7,27 @@ Springer Nature `sn-jnl` template (Math & Physical Sciences, numbered references
 
 - `main.tex` — manuscript, class `sn-jnl` with `\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}`.
 - `refs.bib` — 23 references in BibTeX (keys match `\cite` in `main.tex`).
-- `figures/` — **not yet created** (Phase C/D): vector PDFs, see contract below.
+- `sn-jnl.cls`, `sn-*.bst` — Springer Nature class + bibliography styles (from the official
+  December-2024 template package; kept here so the paper compiles as-is).
+- `figures/` — **placeholder PDFs** for now (Phase C/D replaces them with the real vector figures).
 
-## What you must add to compile
+## How to compile
 
-The Springer Nature class/style files are **not redistributable via CTAN**, so they are not
-committed here. Get them once from the official template and drop them next to `main.tex`:
+The Springer Nature class/style files are already in this folder, so it builds directly:
 
-- **Easiest:** open the [Springer Nature LaTeX template on Overleaf](https://www.overleaf.com/latex/templates/springer-nature-latex-template/gsvvftmrppwq)
-  → *Open as Template*, then replace its `main.tex` with ours and upload `refs.bib`.
-- **Local:** download the template `.zip` (while logged in to Springer/Overleaf), copy
-  `sn-jnl.cls` and `sn-mathphys.bst` (+ the `sn-*.bst` it needs) into `paper/`, then:
+```
+pdflatex main
+bibtex   main
+pdflatex main
+pdflatex main
+```
 
-  ```
-  pdflatex main
-  bibtex   main
-  pdflatex main
-  pdflatex main
-  ```
+Produces `main.pdf` in the journal house style. **Verified locally with sn-jnl:**
+28 pages, 0 errors, 0 undefined citations/references, 23 references rendered in
+`sn-mathphys-num` (numbered) style.
 
-> The **body** of `main.tex` was validated locally by compiling it under the `article` class
-> (pdflatex + bibtex): 0 errors, all 23 citations resolve, references render. The `sn-jnl`
-> front matter follows the documented template API but was not compile-tested here (no class file).
+> Alternative: the same `main.tex` + `refs.bib` can be uploaded to the
+> [Springer Nature template on Overleaf](https://www.overleaf.com/latex/templates/springer-nature-latex-template/gsvvftmrppwq).
 
 ## Changes applied during the port (review these)
 
