@@ -10,11 +10,17 @@ from _bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
+from pathlib import Path
+
 from qdyn_research.liouvillian import build_liouvillian_dense
 from qdyn_research.metrics import calculate_excitability_map, entropic_distance, get_projection_coefficient
 from qdyn_research.mpemba import find_guaranteed_mpemba_dense
 from qdyn_research.spectral import analyze_liouvillian_modes_dense_strict
 from qdyn_research.topology import generate_rewired_grid_tau_guaranteed_connectivity
+from qdyn_research.plot_style import (apply_style, save_pdf, WIDTH_FULL, SEQ_CMAP,
+                                      EDGE_WIDTH, EDGE_COLOR, EDGE_ALPHA)
+
+FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
 
 
 # ---------------------------
@@ -45,26 +51,25 @@ def get_node_positions(height, width):
 
 def draw_base_graph(ax, graph, pos, node_colors, scale_factor, title=None, vmax=None):
     node_size = 450 * (scale_factor ** 2)
-    edge_width = 1.5 * scale_factor
     vmax = np.max(node_colors) if vmax is None else vmax
 
-    nx.draw_networkx_edges(graph, pos, ax=ax, edge_color="gray", alpha=0.5, width=edge_width)
+    nx.draw_networkx_edges(graph, pos, ax=ax, edge_color=EDGE_COLOR, alpha=EDGE_ALPHA, width=EDGE_WIDTH)
     nx.draw_networkx_nodes(
         graph,
         pos,
         ax=ax,
         node_color=node_colors,
-        cmap="inferno",
+        cmap=SEQ_CMAP,
         vmin=0,
         vmax=vmax,
         node_size=node_size,
         edgecolors="black",
-        linewidths=max(0.5, 1.5 * scale_factor),
+        linewidths=0.5,
     )
     ax.set_aspect("equal")
     ax.axis("off")
     if title:
-        ax.set_title(title, fontsize=11)
+        ax.set_title(title, fontsize=9)
 
 
 def highlight_nodes(ax, graph, pos, nodes, color, scale_factor):
@@ -95,6 +100,7 @@ def load_or_build_system():
 
 
 def main():
+    apply_style()
     tau, _liouvillian, _evals, left_vecs, right_vecs = load_or_build_system()
 
     graph = nx.from_numpy_array(tau)
@@ -105,14 +111,11 @@ def main():
     maps = {k: calculate_excitability_map(left_vecs, right_vecs, k, N) for k in [1, 2, 3]}
     b_map_1 = maps[1]
 
-    fig1 = plt.figure(figsize=(15, 5))
-    gs1 = gridspec.GridSpec(1, 3, wspace=0.1)
+    fig1, axs1 = plt.subplots(1, 3, figsize=(WIDTH_FULL, WIDTH_FULL * 0.4), layout="constrained")
     for i, k in enumerate([1, 2, 3]):
-        ax = fig1.add_subplot(gs1[0, i])
-        draw_base_graph(ax, graph, pos, maps[k], scale_factor, title=f"Mode k={k}")
-    fig1.suptitle("Step 1: Spectral analysis (brightness maps)", fontsize=16)
-    fig1.savefig("Step1_Three_Modes.png", bbox_inches="tight", dpi=150)
-    plt.close(fig1)
+        draw_base_graph(axs1[i], graph, pos, maps[k], scale_factor, title=f"$k={k}$")
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    save_pdf(fig1, str(FIG_DIR / "Step1_Three_Modes.pdf"))
 
     vec_hot, vec_cold, vec_cold_score, history = find_guaranteed_mpemba_dense(
         left_vecs,

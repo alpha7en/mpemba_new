@@ -18,6 +18,10 @@
 % custom double-ket used in the Liouville-space notation
 \newcommand{\ketket}[1]{\left| #1 \right\rangle \! \mathclose{\left. \vphantom{#1} \right\rangle}}
 
+% Springer template sets this (sn-article.tex): prevents vertical glue from being
+% stretched to fill sparse pages, which otherwise blows up spacing around displays.
+\raggedbottom
+
 \begin{document}
 
 \title[Quantum Mpemba Effect]{Quantum Mpemba Effect in Disordered Lattices}
