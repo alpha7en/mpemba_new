@@ -1,127 +1,112 @@
+"""Fig. 3 (simulation_lattice_10x10): relaxation dynamics D(rho(t)) for the candidate initial
+states on a 10x10 lattice. Trajectory crossings (bold curves) are the Mpemba effect. Rendered
+at gamma = 0.5 (the value that reproduces the published crossings at t ~ 0.85 and 4.5).
+Only the plotting is styled; the ODE integration is unchanged and cached.
+"""
+from pathlib import Path
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 from _bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
-import matplotlib.pyplot as plt
-import numpy as np
-
 from qdyn_research import (
     QuantumSimulatorCore,
     build_liouvillian_dense,
-    create_boundary_state,
-    create_checkerboard_state,
-    create_entangled_diagonal_state,
-    create_four_corners_state,
-    create_inner_corners_state,
-    create_localized_state,
-    create_mixed_diagonal_state,
-    create_opposite_corners_state,
-    create_top_bottom_edges_state,
     generate_grid_tau,
+    create_localized_state,
+    create_opposite_corners_state,
+    create_four_corners_state,
+    create_mixed_diagonal_state,
+    create_entangled_diagonal_state,
+    create_inner_corners_state,
+    create_top_bottom_edges_state,
+    create_checkerboard_state,
 )
+from qdyn_research.plot_style import apply_style, save_pdf, WIDTH_FULL
+
+FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
+PRECALC = Path(__file__).resolve().parent / "precalc"
+CACHE = PRECALC / "fig3_dynamics.npz"
+
+N = 10
+J, GAMMA = 1.0, 0.1     # gamma choice reproduces the published Fig.3
+T_MAX = 100.0
+
+# numbered so the caption's "pairs (3 and 5) and (4 and 5)" keeps meaning; Boundary (old #9) dropped
+STATES = [
+    ("1. Center", create_localized_state),
+    ("2. Opp. corners", create_opposite_corners_state),
+    ("3. Four corners", create_four_corners_state),
+    ("4. Mixed diag.", create_mixed_diagonal_state),
+    ("5. Coherent diag.", create_entangled_diagonal_state),
+    ("6. Inner corners", create_inner_corners_state),
+    ("7. Edges (t/b)", create_top_bottom_edges_state),
+    ("8. Checkerboard", create_checkerboard_state),
+]
+HIGHLIGHT = {2, 3, 4}  # indices (0-based) of states 3, 4, 5 -> bold
 
 
-def find_intersection(t1, d1, t2, d2):
-    for i in range(1, len(t1)):
+def compute():
+    tau = generate_grid_tau(N, N)
+    liouvillian = build_liouvillian_dense(tau, J, GAMMA)
+    sim = QuantumSimulatorCore()
+    curves = []
+    for _name, gen in STATES:
+        rho, _idx = gen(N, N)
+        rho = rho / np.trace(rho)
+        # tiny atol => the plateau event never fires, so we integrate the full [0, T_MAX] window
+        t, d, _ = sim.run_simulation(liouvillian, rho, t_span=(0, T_MAX), atol=1e-12)
+        curves.append(d)
+    return np.asarray(t), np.asarray(curves)
+
+
+def find_intersection(t, d1, d2):
+    for i in range(1, len(t)):
         if (d1[i - 1] - d2[i - 1]) * (d1[i] - d2[i]) < 0:
-            intersect_t = t1[i - 1] + (t1[i] - t1[i - 1]) * abs(d1[i - 1] - d2[i - 1]) / abs((d1[i] - d2[i]) - (d1[i - 1] - d2[i - 1]))
-            intersect_d = d1[i - 1] + (d1[i] - d1[i - 1]) * (intersect_t - t1[i - 1]) / (t1[i] - t1[i - 1])
-            return intersect_t, intersect_d
+            f = abs(d1[i - 1] - d2[i - 1]) / abs((d1[i] - d2[i]) - (d1[i - 1] - d2[i - 1]))
+            xt = t[i - 1] + (t[i] - t[i - 1]) * f
+            xd = d1[i - 1] + (d1[i] - d1[i - 1]) * (xt - t[i - 1]) / (t[i] - t[i - 1])
+            return xt, xd
     return None
 
 
 def main():
-    simulator = QuantumSimulatorCore()
+    apply_style()
 
-    # ---------------------------
-    # Dynamics parameters
-    # ---------------------------
-    j_val = 1.0
-    gamma_val = 0.1
+    if CACHE.exists() and np.isclose(np.load(CACHE)["gamma"], GAMMA):
+        z = np.load(CACHE)
+        t, curves = z["t"], z["curves"]
+    else:
+        t, curves = compute()
+        PRECALC.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(CACHE, t=t, curves=curves, gamma=GAMMA)
 
-    # ---------------------------
-    # Initial-state ensemble
-    # ---------------------------
-    generators = {
-        "1. Center (Mixed)": create_localized_state,
-        "2. Opposite corners (Mixed)": create_opposite_corners_state,
-        "3. Four corners (Mixed)": create_four_corners_state,
-        "4. Mixed diagonal": create_mixed_diagonal_state,
-        "5. Entangled diagonal": create_entangled_diagonal_state,
-        "6. Inner corners (Mixed)": create_inner_corners_state,
-        "7. Edges (top/bottom) (Mixed)": create_top_bottom_edges_state,
-        "8. Checkerboard (Mixed)": create_checkerboard_state,
-        "9. Boundary (Mixed)": create_boundary_state,
-    }
+    palette = plt.get_cmap("tab10")
+    fig, ax = plt.subplots(figsize=(WIDTH_FULL, WIDTH_FULL * 0.6), layout="constrained")
 
-    for n in range(10, 11):
-        fig, ax = plt.subplots(figsize=(12, 8))
-        tau = generate_grid_tau(n, n)
+    for i, (name, _gen) in enumerate(STATES):
+        bold = i in HIGHLIGHT
+        ax.plot(t, curves[i], color=palette(i), lw=2.0 if bold else 1.0,
+                alpha=1.0 if bold else 0.55, label=name, zorder=3 if bold else 2)
 
-        # Lindblad equation in vectorized form: d/dt vec(rho)=L vec(rho), vec uses order='F'.
-        liouvillian = build_liouvillian_dense(tau, j_val, gamma_val)
+    for a, b in [(2, 4), (3, 4)]:  # crossings for pairs (3,5) and (4,5)
+        hit = find_intersection(t, curves[a], curves[b])
+        if hit:
+            ax.plot(*hit, "o", ms=4, color="crimson", zorder=5)
 
-        case_data = {}
-        for name, generator in generators.items():
-            rho_initial, _ = generator(n, n)
-            if rho_initial is None:
-                continue
-            trace = np.trace(rho_initial)
-            if np.isclose(trace, 0):
-                continue
+    ax.set_xlim(0, T_MAX)
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel("time $t$")
+    ax.set_ylabel(r"distance to equilibrium $D(\rho(t))$")
+    ax.grid(True, ls="--", lw=0.4, alpha=0.5)
+    ax.legend(loc="upper right", fontsize=8, ncol=1, handlelength=1.6, labelspacing=0.3)
 
-            rho_initial = rho_initial / trace
-            t, d, elapsed = simulator.run_simulation(liouvillian, rho_initial)
-            print(f"{name}: {elapsed:.3f}s, {len(t)} points")
-
-            if name.startswith("3. Four corners") or name.startswith("4. Mixed diagonal") or name.startswith("5. Entangled diagonal"):
-                ax.plot(t, d, label=name, lw=6)
-                case_data[name] = (t, d)
-            else:
-                ax.plot(t, d, label=name, lw=2, alpha=0.5)
-
-        if "3. Four corners (Mixed)" in case_data and "5. Entangled diagonal" in case_data:
-            t3, d3 = case_data["3. Four corners (Mixed)"]
-            t5, d5 = case_data["5. Entangled diagonal"]
-            inter = find_intersection(t3, d3, t5, d5)
-            if inter:
-                ax.plot(inter[0], inter[1], "o", markersize=8, color="red")
-
-        if "5. Entangled diagonal" in case_data and "4. Mixed diagonal" in case_data:
-            t5, d5 = case_data["5. Entangled diagonal"]
-            t4, d4 = case_data["4. Mixed diagonal"]
-            inter = find_intersection(t5, d5, t4, d4)
-            if inter:
-                ax.plot(inter[0], inter[1], "o", markersize=8, color="red")
-
-        # Tighten plotting area to axes in the 1st quadrant
-        ax.margins(x=0, y=0)
-        ax.set_xlim(left=0)
-        ax.set_ylim(bottom=0)
-
-        # 1.5x larger + bold text
-        ax.set_title(f"Relaxation dynamics for {n}x{n} lattice", fontsize=24, fontweight="bold")
-        ax.set_xlabel("Time, t", fontsize=18, fontweight="bold")
-        ax.set_ylabel("Distance metric D(t)", fontsize=18, fontweight="bold")
-        ax.tick_params(axis="both", labelsize=15)
-        for lbl in ax.get_xticklabels() + ax.get_yticklabels():
-            lbl.set_fontweight("bold")
-
-        # Remove grid
-        ax.grid(False)
-
-        # Bold + larger legend text
-        ax.legend(loc="upper right", prop={"size": 15, "weight": "bold"})
-
-        fig.tight_layout()
-        fig.savefig(
-            f"9states_modes_simulation_line_{n}x{n}_with_selection_ENG.png",
-            bbox_inches="tight",
-            pad_inches=0.0,
-        )
-        plt.close(fig)
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    save_pdf(fig, str(FIG_DIR / "9states_modes_simulation_line_10x10_with_selection_ENG.pdf"))
 
 
 if __name__ == "__main__":
     main()
-

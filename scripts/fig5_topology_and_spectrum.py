@@ -1,127 +1,101 @@
+"""Fig. 5 (rewired_spectra): three panels with_examples_1/2/3 for a 10x10 lattice at
+increasing disorder (p=0, 0.1, 0.3). Each panel = the graph topology (top, rewired edges
+highlighted) + the Liouvillian eigenvalue spectrum in the complex plane (bottom). Only the
+plotting is styled; the spectrum computation (dense eig) is unchanged and cached.
+"""
+from pathlib import Path
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+from matplotlib.ticker import FuncFormatter, MaxNLocator
+
 from _bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
-
 from qdyn_research.liouvillian import build_liouvillian_dense
 from qdyn_research.spectral import analyze_liouvillian_modes_dense
-from qdyn_research.topology import generate_grid_tau, generate_grid_with_manual_links_tau, generate_rewired_grid_tau
+from qdyn_research.topology import generate_grid_tau, generate_rewired_grid_tau
+from qdyn_research.plot_style import apply_style, save_pdf, WIDTH_THIRD
+
+FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
+PRECALC = Path(__file__).resolve().parent / "precalc"
+CACHE = PRECALC / "fig5_spectra.npz"
+
+H = W = 10
+N = H * W
+J, GAMMA = 1.0, 0.1
+P_VALUES = [0.0, 0.1, 0.3]
+N_PLOT = 200
 
 
-def draw_topology(ax, tau, height, width, mode, extra_links=None, p=None):
-    n = height * width
-    pos = {i: (i % width, -(i // width)) for i in range(n)}
+def compute():
+    """One dense Liouvillian eig per disorder level; keep the 200 slowest eigenvalues + tau."""
+    taus, lams = [], []
+    for p in P_VALUES:
+        tau = generate_grid_tau(H, W) if p == 0.0 else generate_rewired_grid_tau(H, W, p)
+        lambdas, _ = analyze_liouvillian_modes_dense(build_liouvillian_dense(tau, J, GAMMA))
+        taus.append(tau)
+        lams.append(lambdas[:N_PLOT])
+    return np.array(taus), np.array(lams)
 
-    for i in range(n):
-        for j in range(i + 1, n):
-            if tau[i, j] == 1:
-                ax.plot([pos[i][0], pos[j][0]], [pos[i][1], pos[j][1]], color="lightgray", linewidth=1.5, zorder=0)
 
-    highlighted_nodes = set()
-    special_edges = []
-
-    if mode == "manual_links" and extra_links is not None:
-        special_edges = extra_links
-    elif mode == "rewired":
-        initial_tau = generate_grid_tau(height, width)
-        for i in range(n):
-            for j in range(i + 1, n):
-                if tau[i, j] == 1 and initial_tau[i, j] == 0:
-                    special_edges.append((i, j))
-
-    if special_edges:
-        colors = plt.get_cmap("gist_rainbow", len(special_edges))
-        for idx, (u, v) in enumerate(special_edges):
-            ax.plot([pos[u][0], pos[v][0]], [pos[u][1], pos[v][1]], color=colors(idx), linewidth=3, zorder=1)
-            highlighted_nodes.update([u, v])
-
-    node_colors = ["red" if i in highlighted_nodes else "skyblue" for i in range(n)]
-    ax.scatter([p_[0] for p_ in pos.values()], [p_[1] for p_ in pos.values()], s=150, c=node_colors, edgecolors="black", zorder=2)
+def draw_topology(ax, tau):
+    pos = {i: (i % W, (H - 1) - (i // W)) for i in range(N)}
+    base = generate_grid_tau(H, W)
+    rewired_nodes = set()
+    for i in range(N):
+        for j in range(i + 1, N):
+            if tau[i, j] == 1 and base[i, j] == 1:  # surviving grid edge
+                ax.plot([pos[i][0], pos[j][0]], [pos[i][1], pos[j][1]], color="0.8", lw=0.4, zorder=0)
+            elif tau[i, j] == 1 and base[i, j] == 0:  # rewired (long-range) edge
+                ax.plot([pos[i][0], pos[j][0]], [pos[i][1], pos[j][1]], color="#D55E00", lw=0.8, zorder=1)
+                rewired_nodes |= {i, j}
+    colors = ["#D55E00" if i in rewired_nodes else "0.55" for i in range(N)]
+    xs = [pos[i][0] for i in range(N)]
+    ys = [pos[i][1] for i in range(N)]
+    ax.scatter(xs, ys, s=7, c=colors, edgecolors="black", linewidths=0.2, zorder=2)
     ax.set_aspect("equal")
     ax.axis("off")
-    if mode != "rewired":
-        ax.set_title(f"Топология сети (Режим: {mode})", fontsize=16, fontweight="bold")
 
 
-def draw_spectrum(ax, eigenvalues):
-    ax.scatter(eigenvalues.real, eigenvalues.imag, c="blue", alpha=0.7, edgecolors="k", s=50)
-    ax.spines["left"].set_position("zero")
-    ax.spines["bottom"].set_position("zero")
-    ax.spines["right"].set_color("none")
-    ax.spines["top"].set_color("none")
-
-    ax.set_xlabel(r"$\mathbf{Re}\,\boldsymbol{\lambda}$", loc="right", fontsize=20, fontweight="bold")
-    ax.set_ylabel(r"$\mathbf{Im}\,\boldsymbol{\lambda}$", fontsize=20, fontweight="bold")
-    ax.set_title("Eigenvalue spectrum of Liouvillian", fontsize=25, fontweight="bold")
-
-    ax.minorticks_on()
-    ax.tick_params(axis="both", which="major", labelsize=20, length=4, width=1.2, direction="inout")
-    ax.tick_params(axis="both", which="minor", length=2, width=1.0, direction="inout")
-
-    for label in ax.get_xticklabels() + ax.get_yticklabels():
-        label.set_fontweight("bold")
-
-    # hide duplicate 0 at origin on Y axis
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda val, pos: "" if abs(val) < 1e-12 else f"{val:g}"))
-
-    # center X coordinate of Y-label on the moved vertical axis (x=0)
-    x0_display = ax.transData.transform((0, 0))[0]
-    x0_axes = ax.transAxes.inverted().transform((x0_display, 0))[0]
-
-    # move Y-label upward to approximately y=3.7 (in data coordinates)
-    y_target_display = ax.transData.transform((0, 3.7))[1]
-    y_target_axes = ax.transAxes.inverted().transform((0, y_target_display))[1]
-
-    # shift label a bit to the right of the vertical axis to avoid overlap with y tick labels
-    x_shift_axes = 0.05
-    ax.yaxis.set_label_coords(x0_axes + x_shift_axes, y_target_axes)
-    ax.yaxis.label.set_horizontalalignment("left")
-
-    ax.grid(False)
+def draw_spectrum(ax, lambdas):
+    # framed axes + a thin reference cross at Re=0 / Im=0 (imaginary axis marks the slow modes);
+    # standard left/bottom labels avoid the right-edge clipping of the spine-at-zero style.
+    ax.axvline(0, color="0.7", lw=0.5, zorder=0)
+    ax.axhline(0, color="0.7", lw=0.5, zorder=0)
+    ax.scatter(lambdas.real, lambdas.imag, c="#0072B2", s=3.5, edgecolors="none", alpha=0.75, zorder=2)
+    ax.set_xlim(-0.1, 0.008)   # common axes across the three panels for a fair comparison
+    ax.set_ylim(-4.3, 4.3)
+    ax.set_xlabel(r"$\mathrm{Re}\,\lambda$", fontsize=8, labelpad=1)
+    ax.set_ylabel(r"$\mathrm{Im}\,\lambda$", fontsize=8, labelpad=1)
+    ax.xaxis.set_major_locator(MaxNLocator(nbins=3))
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
+    ax.tick_params(labelsize=8, length=2, width=0.5)
+    for s in ax.spines.values():
+        s.set_linewidth(0.5)
 
 
 def main():
-    # ---------------------------
-    # System and plotting parameters
-    # ---------------------------
-    height =10
-    width = 10
-    j = 1.0
-    gamma = 0.1
-    num_modes_to_plot = 200
-    mode = "rewired"
-
-    if mode == "grid":
-        tau = generate_grid_tau(height, width)
-        kwargs = {}
-        filename = f"{width}x{height} {mode} spectrum"
-    elif mode == "manual_links":
-        links = [(0, height * width - 1)]
-        tau = generate_grid_with_manual_links_tau(height, width, links)
-        kwargs = {"extra_links": links}
-        filename = f"{width}x{height} {mode} spectrum"
+    apply_style()
+    if CACHE.exists():
+        z = np.load(CACHE)
+        taus, lams = z["taus"], z["lams"]
     else:
-        p_rewire = 0.1
-        tau = generate_rewired_grid_tau(height, width, p_rewire)
-        kwargs = {"p": p_rewire}
-        filename = f"{width}x{height} {mode}  spectrum p0_{int(p_rewire * 100)}"
+        taus, lams = compute()
+        PRECALC.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(CACHE, taus=taus, lams=lams)
 
-    # Liouvillian spectrum lambda_k is plotted in the complex plane (Re, Im).
-    liouvillian = build_liouvillian_dense(tau, j, gamma)
-    lambdas, _ = analyze_liouvillian_modes_dense(liouvillian)
-    lambdas_to_plot = lambdas[:num_modes_to_plot]
-
-    fig, (ax_topo, ax_spec) = plt.subplots(2, 1, figsize=(10, 20), gridspec_kw={"height_ratios": [1, 1]})
-    plt.style.use("seaborn-v0_8-whitegrid")
-    draw_topology(ax_topo, tau, height, width, mode, **kwargs)
-    draw_spectrum(ax_spec, lambdas_to_plot)
-    fig.tight_layout(pad=4.0)
-    fig.savefig(f"{filename}.png")
-    plt.close(fig)
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    for i in range(len(P_VALUES)):
+        fig = plt.figure(figsize=(WIDTH_THIRD, WIDTH_THIRD * 2.05))
+        gs = gridspec.GridSpec(2, 1, figure=fig, height_ratios=[1, 1.15],
+                               left=0.2, right=0.97, top=0.99, bottom=0.09, hspace=0.16)
+        draw_topology(fig.add_subplot(gs[0]), taus[i])
+        draw_spectrum(fig.add_subplot(gs[1]), lams[i])
+        save_pdf(fig, str(FIG_DIR / f"with_examples_{i + 1}.pdf"))
 
 
 if __name__ == "__main__":
     main()
-

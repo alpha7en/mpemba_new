@@ -1,129 +1,141 @@
+"""Fig. 1 (big_modes_map): atlas of Liouvillian relaxation-mode population maps for a regular
+10x10 lattice. Modes are grouped into degeneracy multiplets k' (same Re(lambda)) and laid out
+in TWO super-columns (as in the published figure) to keep a near-page portrait aspect.
+
+Each map is Re(diag(Mat(v_k))) rendered with the red(+)/white(0)/blue(-) convention, opacity =
+|p_k|/max|p_k| (global normalization). Per-mode titles are dropped (kept only the group label
+k'+Re(lambda)); a shared amplitude colorbar sits at the bottom.
+
+The dense 10000x10000 eig is heavy, so the population maps are cached to precalc/ — the layout
+can then be restyled instantly and the figure is reproducible. The computation is unchanged.
+"""
+import math
+from pathlib import Path
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
+from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.cm import ScalarMappable
+
 from _bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
-
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 
 from qdyn_research import (
     analyze_liouvillian_modes_dense_strict,
     build_liouvillian_dense,
     draw_population_mode_on_axis,
     generate_grid_tau,
-    generate_relative_amplitude_colorbar,
 )
+from qdyn_research.plot_style import apply_style, save_pdf, WIDTH_FULL
+
+HEIGHT = WIDTH = 10
+N = HEIGHT * WIDTH
+J, GAMMA = 1.0, 0.1
+NUM_MODES = 99
+
+FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
+PRECALC = Path(__file__).resolve().parent / "precalc"
+CACHE = PRECALC / "fig1_modes.npz"
+
+# blue(-1) - white(0) - red(+1), matching the opacity-blended circle rendering
+BWR = LinearSegmentedColormap.from_list("bwr_amp", [(0, "blue"), (0.5, "white"), (1.0, "red")])
 
 
-# Figure 1: grouped population maps for slow Liouvillian modes.
-def plot_dynamically_grouped_diagrams(sorted_eigenvalues, sorted_eigenvectors, height, width, num_modes_to_show):
-    n = height * width
-    modes = list(range(1, min(num_modes_to_show, n * n)))
-    if not modes:
-        return
+def compute():
+    """Dense eig of the regular-lattice Liouvillian -> population map of each mode. Unchanged."""
+    tau = generate_grid_tau(HEIGHT, WIDTH)
+    liouvillian = build_liouvillian_dense(tau, J, GAMMA)
+    lambdas, _, right = analyze_liouvillian_modes_dense_strict(liouvillian)
+    pop_maps = np.array([
+        np.diag(right[:, k].reshape((N, N), order="F")).real.reshape(HEIGHT, WIDTH)
+        for k in range(NUM_MODES)
+    ])
+    return lambdas[:NUM_MODES], pop_maps
 
-    # Group modes by near-degenerate Re(lambda), up to four modes per group.
-    groups = []
-    current_group = [modes[0]]
-    for idx in range(1, len(modes)):
-        k_curr = modes[idx]
-        k_prev = current_group[-1]
-        if np.isclose(sorted_eigenvalues[k_curr].real, sorted_eigenvalues[k_prev].real) and len(current_group) < 4:
-            current_group.append(k_curr)
+
+def group_modes(lambdas):
+    """Group non-trivial modes into multiplets sharing Re(lambda) (<=4 per group). Unchanged."""
+    modes = list(range(1, NUM_MODES))
+    groups, current = [], [modes[0]]
+    for k in modes[1:]:
+        if np.isclose(lambdas[k].real, lambdas[current[-1]].real) and len(current) < 4:
+            current.append(k)
         else:
-            groups.append(current_group)
-            current_group = [k_curr]
-    groups.append(current_group)
+            groups.append(current)
+            current = [k]
+    groups.append(current)
+    return groups
 
-    # Population extraction uses column-major reshape to stay consistent with vec(rho).
-    population_maps = []
-    for k in range(num_modes_to_show):
-        rho_k = sorted_eigenvectors[:, k].reshape((n, n), order="F")
-        population_maps.append(np.diag(rho_k).real.reshape((height, width)))
 
-    max_abs = 0.0
-    if num_modes_to_show > 1:
-        non_trivial = np.array(population_maps[1:])
-        if non_trivial.size > 0:
-            max_abs = np.max(np.abs(non_trivial))
-    k_scaler = 1.0 / (max_abs + 1e-9)
+def draw_group_row(fig, subspec, k_prime, lam_real, group, pop_maps, k_scaler):
+    """One group: left label (k', Re(lambda)) + up to 4 mode maps spanning the 4 map slots."""
+    row = GridSpecFromSubplotSpec(1, 5, subplot_spec=subspec, width_ratios=[1.8, 1, 1, 1, 1], wspace=0.04)
+    ax_lbl = fig.add_subplot(row[0])
+    ax_lbl.axis("off")
+    ax_lbl.text(0.5, 0.5, f"$k'={k_prime}$\n$\\mathrm{{Re}}(\\lambda)$\n$\\approx {lam_real:.4f}$",
+                ha="center", va="center", fontsize=8)
 
-    scaling_damp = 0.4
-    fig_width = 20
-    info_ratio = 1.5
-    diag_ratio = 2.0
-    num_diag_cols = 4
-    total_ratio = info_ratio + diag_ratio * num_diag_cols
-    diag_total_width = fig_width * (diag_ratio * num_diag_cols) / total_ratio
-    base_row_height = diag_total_width / num_diag_cols
-    aspect_adjust = height / float(width)
-    row_heights = [base_row_height * (num_diag_cols / len(g)) ** scaling_damp * aspect_adjust for g in groups]
+    m = len(group)
+    if m == 1:
+        axes = [fig.add_subplot(row[1:])]
+    elif m == 2:
+        axes = [fig.add_subplot(row[1:3]), fig.add_subplot(row[3:])]
+    elif m == 3:
+        sub = GridSpecFromSubplotSpec(1, 3, subplot_spec=row[1:], wspace=0.04)
+        axes = [fig.add_subplot(sub[i]) for i in range(3)]
+    else:
+        axes = [fig.add_subplot(row[1 + i]) for i in range(4)]
 
-    fig = plt.figure(figsize=(fig_width, sum(row_heights)), dpi=150)
-    main_gs = GridSpec(len(groups), 1, figure=fig, hspace=0.1, height_ratios=row_heights)
-
-    for row_idx, group in enumerate(groups):
-        row_gs = GridSpecFromSubplotSpec(1, 5, subplot_spec=main_gs[row_idx], width_ratios=[1.5, 2, 2, 2, 2], wspace=0.0)
-        ax_info = fig.add_subplot(row_gs[0])
-        ax_info.axis("off")
-        lam = sorted_eigenvalues[group[0]]
-        ax_info.text(0.5, 0.5, f"k' = {row_idx + 1}\n\n    Re(λ) ≈\n {lam.real:.4f}", ha="center", va="center", fontsize=25)
-
-        axes = []
-        if len(group) == 1:
-            axes.append(fig.add_subplot(row_gs[1:]))
-        elif len(group) == 2:
-            axes.append(fig.add_subplot(row_gs[1:3]))
-            axes.append(fig.add_subplot(row_gs[3:]))
-        elif len(group) == 3:
-            sub = GridSpecFromSubplotSpec(1, 3, subplot_spec=row_gs[1:], wspace=0.0)
-            axes.extend([fig.add_subplot(sub[0]), fig.add_subplot(sub[1]), fig.add_subplot(sub[2])])
-        else:
-            axes.extend([fig.add_subplot(row_gs[1]), fig.add_subplot(row_gs[2]), fig.add_subplot(row_gs[3]), fig.add_subplot(row_gs[4])])
-
-        for local_idx, k in enumerate(group):
-            draw_population_mode_on_axis(
-                ax=axes[local_idx],
-                population_map=population_maps[k],
-                height=height,
-                width=width,
-                k_scaler=k_scaler,
-                title_text=f"k = {k}   Im(λ) ≈ {sorted_eigenvalues[k].imag:.4f}",
-                radius=0.45,
-                grid_linewidth=1.0,
-                hide_spines=False,
-                circle_edgecolor=None,
-                circle_linewidth=0.0,
-                title_fontsize=15,
-                title_y=None,
-                title_fontweight="bold",
-            )
-
-    out_name = f"{height}x{width}_dynamically_grouped_diagrams_final_with_correct_norm_RESTORED2.png"
-    fig.savefig(out_name, bbox_inches="tight", pad_inches=0.02)
-    plt.close(fig)
-    generate_relative_amplitude_colorbar(
-        f"{height}x{width}_dynamically_grouped_diagrams_final.png",
-        label="relative population amplitude ($p_k / max|p_k|$)",
-    )
+    for ax, k in zip(axes, group):
+        draw_population_mode_on_axis(
+            ax, pop_maps[k], HEIGHT, WIDTH, k_scaler,
+            title_text="", radius=0.46, grid_linewidth=0.4,
+            hide_spines=False, circle_edgecolor=None, circle_linewidth=0.0,
+            title_fontsize=1, title_y=None,
+        )
 
 
 def main():
-    # ---------------------------
-    # System and visualization parameters
-    # ---------------------------
-    height = 10
-    width = 10
-    j = 1.0
-    gamma = 0.1
-    num_modes_to_visualize = 99
+    apply_style()
+    if CACHE.exists():
+        z = np.load(CACHE)
+        lambdas, pop_maps = z["lambdas"], z["pop_maps"]
+    else:
+        lambdas, pop_maps = compute()
+        PRECALC.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(CACHE, lambdas=lambdas, pop_maps=pop_maps)
 
-    tau = generate_grid_tau(height, width)
-    liouvillian = build_liouvillian_dense(tau, j, gamma)
-    lambdas, _, right = analyze_liouvillian_modes_dense_strict(liouvillian)
-    plot_dynamically_grouped_diagrams(lambdas, right, height, width, num_modes_to_visualize)
+    k_scaler = 1.0 / (np.max(np.abs(pop_maps[1:])) + 1e-9)
+    groups = group_modes(lambdas)
+
+    # split groups into two super-columns
+    half = math.ceil(len(groups) / 2)
+    columns = [(0, groups[:half]), (half, groups[half:])]
+
+    w = 0.9 * WIDTH_FULL
+    fig = plt.figure(figsize=(w, w * 1.42))
+    outer = GridSpec(2, 2, height_ratios=[1, 0.025], hspace=0.06, wspace=0.06, figure=fig,
+                     left=0.03, right=0.97, top=0.995, bottom=0.06)
+
+    scaling_damp = 0.4
+    for col_idx, (offset, col_groups) in enumerate(columns):
+        rh = [(4.0 / len(g)) ** scaling_damp for g in col_groups]
+        col_gs = GridSpecFromSubplotSpec(len(col_groups), 1, subplot_spec=outer[0, col_idx],
+                                         height_ratios=rh, hspace=0.12)
+        for r, group in enumerate(col_groups):
+            draw_group_row(fig, col_gs[r], offset + r + 1, lambdas[group[0]].real, group, pop_maps, k_scaler)
+
+    # shared amplitude colorbar
+    cax = fig.add_subplot(outer[1, :])
+    cb = fig.colorbar(ScalarMappable(Normalize(-1, 1), BWR), cax=cax, orientation="horizontal")
+    cb.set_label(r"relative population amplitude ($p_k / \max|p_k|$)", fontsize=9)
+    cb.set_ticks([-1, -0.5, 0, 0.5, 1])
+
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    save_pdf(fig, str(FIG_DIR / "10x10main_without_numbers.pdf"))
 
 
 if __name__ == "__main__":
     main()
-

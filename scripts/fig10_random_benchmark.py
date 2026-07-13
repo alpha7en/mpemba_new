@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,8 +9,15 @@ from _bootstrap import ensure_src_on_path
 ensure_src_on_path()
 
 from qdyn_research import MpembaValidator
+from qdyn_research.plot_style import apply_style, save_pdf, WIDTH_FULL
+
+FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
+# same 6x6 realization used for the published algorithm figures (migrated legacy checkpoint)
+CHECKPOINT = str(Path(__file__).resolve().parent / "precalc" / "validator_6x6_p015.pkl")
+
 
 def main():
+    apply_style()
     os.makedirs("res_gap", exist_ok=True)
 
     # ---------------------------
@@ -18,10 +26,11 @@ def main():
     h, w = 6, 6
     p_rewire = 0.15
     num_random_trials = 10000
-    time_horizon = np.linspace(0, 30, 300)
+    # horizon must reach the algorithmic crossing (t* ~ 45 on this graph), else it is missed
+    time_horizon = np.linspace(0, 120, 1200)
 
-    validator = MpembaValidator(height=h, width=w, p=p_rewire, J=1.0, gamma=0.1)
-    validator.save_state("res_gap/benchmark.pkl")
+    # Load the exact illustrative graph from the article instead of drawing a new one.
+    validator = MpembaValidator.load_state(CHECKPOINT)
 
     # Compare targeted state search against random sampling of admissible pairs.
     smart_ok, smart_time, smart_adv, smart_gap = validator.run_smart_strategy_score(time_horizon)
@@ -30,11 +39,20 @@ def main():
         t_max = max(30, int(10 * smart_time))
         time_horizon = np.linspace(0, t_max, t_max * 10)
 
-    rnd_ok_count, rnd_times = validator.run_random_pull_strategy(
-        num_random_trials,
-        time_horizon,
-        metric_gap_min=min(np.log(validator.n), smart_gap) / 10,
-    )
+    # Use the published 10^4 random crossing times if available (the exact Fig.13 data),
+    # otherwise recompute the benchmark from scratch.
+    precomp = Path(__file__).resolve().parent / "precalc" / "pivoprosto.txt"
+    if precomp.exists():
+        import re
+        rnd_times = [float(x) for x in re.findall(r"[-+]?\d+\.\d+", precomp.read_text(encoding="utf-8", errors="ignore"))]
+        num_random_trials = len(rnd_times)
+        rnd_ok_count = len(rnd_times)
+    else:
+        rnd_ok_count, rnd_times = validator.run_random_pull_strategy(
+            num_random_trials,
+            time_horizon,
+            metric_gap_min=min(np.log(validator.n), smart_gap) / 10,
+        )
 
     rnd_rate = (rnd_ok_count / num_random_trials) * 100
 
@@ -44,17 +62,18 @@ def main():
         out.write(f"smart_ok={smart_ok}, smart_time={smart_time}, smart_adv={smart_adv}, smart_gap={smart_gap}\n")
         out.write(f"random_success={rnd_ok_count}/{num_random_trials} ({rnd_rate:.2f}%)\n")
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.hist(rnd_times, bins=100, color="gray", alpha=0.6, label="Random search successes")
+    fig, ax = plt.subplots(figsize=(WIDTH_FULL * 0.75, WIDTH_FULL * 0.75 * 0.6), layout="constrained")
+    ax.hist(rnd_times, bins=100, color="0.6", edgecolor="0.35", linewidth=0.3,
+            label="Random search ($10^4$ pairs)")
     if smart_ok:
-        ax.axvline(smart_time, color="red", linestyle="--", linewidth=3, label="Smart strategy")
-    ax.set_title(f"Mpemba search benchmark ({h}x{w}, p={p_rewire})")
-    ax.set_xlabel("Crossing time t*")
-    ax.set_ylabel("Frequency")
+        ax.axvline(smart_time, color="#D55E00", linestyle="--", linewidth=1.6,
+                   label=f"Algorithmic pair ($t^*={smart_time:.1f}$)")
+    ax.set_xlabel("crossing time $t^*$")
+    ax.set_ylabel("number of pairs")
     ax.legend()
-    ax.grid(True, alpha=0.3)
-    fig.savefig("res_gap/benchmark.png", dpi=150)
-    plt.close(fig)
+    ax.grid(True, axis="y", alpha=0.4)
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    save_pdf(fig, str(FIG_DIR / "alg_compare.pdf"))
 
 
 if __name__ == "__main__":

@@ -1,9 +1,15 @@
+"""Fig. 7 (ipr_graphs): mean IPR of the three slowest non-trivial modes vs rewiring
+probability p (log axis), with run-to-run error bars. Reads the precomputed
+rewiring_spectrum_data_*.npz. Only the plotting is styled; the IPR computation is
+unchanged (metrics.calculate_ipr with Fortran-order reshape).
+"""
 import glob
 import os
+from pathlib import Path
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import LogFormatterMathtext
 
 from _bootstrap import ensure_src_on_path
 
@@ -11,107 +17,49 @@ ensure_src_on_path()
 
 from qdyn_research.metrics import calculate_ipr
 from qdyn_research.npz_io import parse_grouped_vectors
+from qdyn_research.plot_style import apply_style, save_pdf, WIDTH_THIRD, LINE_COLORS
+
+FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
+PRECALC = Path(__file__).resolve().parent / "precalc"
 
 
-def _size_to_points(size):
-    if isinstance(size, (int, float)):
-        return float(size)
-    return mpl.font_manager.font_scalings.get(str(size), 1.0) * plt.rcParams["font.size"]
-
-
-def _apply_bold_double_text(ax, label_size, tick_size):
-    ax.xaxis.label.set_fontsize(label_size)
-    ax.xaxis.label.set_fontweight("bold")
-    ax.yaxis.label.set_fontsize(label_size)
-    ax.yaxis.label.set_fontweight("bold")
-    for tick_label in ax.get_xticklabels() + ax.get_yticklabels():
-        tick_label.set_fontsize(tick_size)
-        tick_label.set_fontweight("bold")
-
-
-def _add_log_x_padding(ax, x_values, pad_fraction=0.02):
-    positive_x = [x for x in x_values if x > 0]
-    if not positive_x:
-        return
-    if len(positive_x) == 1:
-        # Visual horizontal padding only, so the marker is not clipped by the frame.
-        ax.margins(x=pad_fraction)
-        return
-
-    # Visual horizontal padding only, computed in log-space for consistent appearance.
-    log_min = np.log10(positive_x[0])
-    log_max = np.log10(positive_x[-1])
-    log_span = log_max - log_min
-    if log_span == 0:
-        ax.margins(x=pad_fraction)
-    else:
-        ax.set_xlim(
-            10 ** (log_min - log_span * pad_fraction),
-            10 ** (log_max + log_span * pad_fraction),
-        )
+def find_npz():
+    cands = glob.glob(str(PRECALC / "rewiring_spectrum_data_*.npz")) + glob.glob("rewiring_spectrum_data_*.npz")
+    if not cands:
+        raise FileNotFoundError("no rewiring_spectrum_data_*.npz in scripts/precalc or cwd")
+    return max(cands, key=os.path.getctime)
 
 
 def main():
-    # ---------------------------
-    # Input dataset
-    # ---------------------------
-    files = glob.glob("rewiring_spectrum_data_*.npz")
-    if not files:
-        raise FileNotFoundError("No rewiring_spectrum_data_*.npz files in current directory")
-    latest = max(files, key=os.path.getctime)
-
-    grouped = parse_grouped_vectors(latest)
-    if not grouped:
-        raise RuntimeError("No grouped vectors found in file")
-
+    apply_style()
+    grouped = parse_grouped_vectors(find_npz())
     p_values = sorted(grouped.keys())
-    first_set = next(iter(grouped.values()))[0]
-    n_sq, num_modes = first_set.shape
-    n = int(np.sqrt(n_sq))
+    p_pos = [p for p in p_values if p > 0]
 
-    modes = [1, 2, 3]
-    if num_modes <= max(modes):
-        raise RuntimeError(f"Need at least {max(modes) + 1} modes, found {num_modes}")
+    n_sq = next(iter(grouped.values()))[0].shape[0]
+    sites = int(np.sqrt(n_sq))       # density-matrix dimension (100 for 10x10)
+    side = int(np.sqrt(sites))       # lattice side (10)
 
-    # ---------------------------
-    # Output parameters
-    # ---------------------------
-    out_dir = "IPR from p images ENG"
-    os.makedirs(out_dir, exist_ok=True)
-
-    for mode_idx in modes:
-        # IPR = sum(|p_i|^4) / (sum(|p_i|^2))^2 from diagonal mode populations p_i.
-        avg = []
-        std = []
-        for p in p_values:
-            iprs = [calculate_ipr(run_vectors[:, mode_idx], n, reshape_order="F") for run_vectors in grouped[p]]
+    for mode, color in zip((1, 2, 3), LINE_COLORS):
+        avg, std = [], []
+        for p in p_pos:
+            iprs = [calculate_ipr(V[:, mode], sites, reshape_order="F") for V in grouped[p]]
             avg.append(np.mean(iprs))
             std.append(np.std(iprs))
 
-        plt.style.use("seaborn-v0_8-whitegrid")
-        fig, ax = plt.subplots(figsize=(10, 7))
-        ax.errorbar(p_values, avg, yerr=std, fmt="-o", capsize=5, alpha=0.9)
-
-        doubled_label_size = 2 * _size_to_points(plt.rcParams["axes.labelsize"])
-        doubled_tick_size = 2 * _size_to_points(plt.rcParams["xtick.labelsize"])
-
-        ax.set_xlabel("p")
-        ax.set_ylabel(f"<IPR(λ_{mode_idx})>")
+        fig, ax = plt.subplots(figsize=(WIDTH_THIRD, WIDTH_THIRD * 0.95), layout="constrained")
+        ax.errorbar(p_pos, avg, yerr=std, fmt="-o", capsize=2, color=color, ecolor=color, alpha=0.9)
         ax.set_xscale("log")
-        ax.set_xticks([0.001, 0.01, 0.1, 1.0])
-        ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
-        ax.grid(True, which="both", linestyle="--")
-
-        _add_log_x_padding(ax, p_values, pad_fraction=0.02)
-        _apply_bold_double_text(ax, doubled_label_size, doubled_tick_size)
-
-        # Layout spacing only: slightly reduce bottom room while keeping x-label fully visible.
-        fig.tight_layout(rect=[0.02, 0.06, 0.98, 0.97])
-
-        fig.savefig(os.path.join(out_dir, f"{n // 10}x{n // 10} IPR graph mode k={mode_idx}.png"))
-        plt.close(fig)
+        ax.set_xlabel("$p$")
+        ax.set_ylabel(rf"$\langle \mathrm{{IPR}}(\lambda_{mode}) \rangle$")
+        # compact exponent ticks every 2 decades (decimal labels collide at 42 mm width)
+        ax.set_xticks([1e-4, 1e-2, 1e0])
+        ax.xaxis.set_major_formatter(LogFormatterMathtext())
+        ax.grid(True, which="both", ls="--")
+        ax.margins(x=0.05)
+        FIG_DIR.mkdir(parents=True, exist_ok=True)
+        save_pdf(fig, str(FIG_DIR / f"{side}x{side}_IPR_graph_mode_k_{mode}.pdf"))
 
 
 if __name__ == "__main__":
     main()
-

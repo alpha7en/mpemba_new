@@ -280,7 +280,7 @@ We decompose each of the 9 candidate initial states into the lattice eigenbasis 
 
 \begin{figure}[H]
     \centerline{\includegraphics[width=1.0\linewidth]{figures/new_tabled_10x10_bar_chart_log_ENG_new_8STATES}}
-    \caption{Spectral decomposition of eight candidate initial states in a $10 \times 10$ lattice. Each \textbf{panel} analyzes a specific initial condition and consists of three elements: (1) a schematic illustration of the initial photon distribution (left), where yellow cells indicate nodes with a non-zero initial photon probability, serving as a binary visual guide independent of exact statistical weights or quantum phases; (2) a bar chart of the mode contribution weights $W_k=|c_k|^2$ (eq. \ref{eq:c_k}) plotted on a \textbf{logarithmic scale} (top right); and (3) spatial population maps of the three dominant eigenmodes providing the largest contribution to the expansion (bottom right). Notably, for the coherent diagonal state (panel 5), the dominant contributions arise from very high-order modes whose local populations fall below the visual color scale threshold, rendering their maps effectively blank (indicated by the  \textit{<}\textit{<0.01} label).}
+    \caption{Spectral decomposition of eight candidate initial states in a $10 \times 10$ lattice. Each \textbf{panel} analyzes a specific initial condition and consists of two elements: (1) a schematic illustration of the initial photon distribution (left), where yellow cells indicate nodes with a non-zero initial photon probability, serving as a binary visual guide independent of exact statistical weights or quantum phases; and (2) a bar chart of the mode contribution weights $W_k=|c_k|^2$ (eq. \ref{eq:c_k}) plotted on a \textbf{logarithmic scale} (right). Panels are ordered by decreasing initial distance to equilibrium $D_0=D(\rho(0))$.}
     \label{fig:9states}
 \end{figure}
 To avoid a misleadingly sparse appearance in linear scale (where the dominant bar masks the remaining weights), we present only the logarithmic visualization. The log scale highlights the intended point: the selected initial states have a strongly \emph{mode-selective} decomposition while still exhibiting nonzero projections onto multiple faster modes.\
@@ -341,16 +341,16 @@ A standard method for investigating phase transitions (or smoother crossovers) i
 
 We plot this dependence for a $10 \times 10$ lattice across different scales. To faithfully reproduce the canonical Watts--Strogatz crossover~\cite{watts1998} for this specific macroscopic metric, the strict BFS connectivity filter (Algorithm~\ref{alg:rewiring}) was relaxed. The goal of this figure is to identify the crossover region in $p$ that will later be compared with spectral changes:
 \begin{figure}[H]
-\centerline{
-\begin{subfigure}{0.37\linewidth}
+\centering
+\begin{subfigure}{0.49\linewidth}
     \includegraphics[width=1\linewidth]{figures/log10x10_p_L}
     \caption{full scale}
 \end{subfigure}
-\begin{subfigure}{0.37\linewidth}
+\hfill
+\begin{subfigure}{0.49\linewidth}
     \includegraphics[width=1\linewidth]{figures/log10x10_p_L_SCALED}
     \caption{crossovering gap}
 \end{subfigure}
-}
 \caption{Average shortest-path length versus rewiring probability $p$ (in log. scale) for a $10\times 10$ lattice, shown in two scalings. The smooth crossover indicates the onset of the small-world regime, i.e., the range of $p$ where adding a small fraction of long-range links sharply reduces typical graph distances.}
 \end{figure}
 We observe a smooth crossover in the range $p \in [0.01, 0.1].$

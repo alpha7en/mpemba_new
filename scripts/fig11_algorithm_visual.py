@@ -17,7 +17,7 @@ from qdyn_research.metrics import calculate_excitability_map, entropic_distance,
 from qdyn_research.mpemba import find_guaranteed_mpemba_dense
 from qdyn_research.spectral import analyze_liouvillian_modes_dense_strict
 from qdyn_research.topology import generate_rewired_grid_tau_guaranteed_connectivity
-from qdyn_research.plot_style import (apply_style, save_pdf, WIDTH_FULL, SEQ_CMAP,
+from qdyn_research.plot_style import (apply_style, save_pdf, WIDTH_FULL, WIDTH_COL, SEQ_CMAP,
                                       EDGE_WIDTH, EDGE_COLOR, EDGE_ALPHA)
 
 FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
@@ -34,9 +34,10 @@ GAMMA = 0.1
 TARGET_P = 0.15
 
 # ---------------------------
-# Optional cached-state file
+# Cached validator (the exact 6x6 realization used for the published algorithm figures,
+# migrated from the legacy pivoprosto3.pkl to reference the qdyn_research class).
 # ---------------------------
-CHECKPOINT = "res_gap/benchmark.pkl"
+CHECKPOINT = str(Path(__file__).resolve().parent / "precalc" / "validator_6x6_p015.pkl")
 
 # ---------------------------
 # Optimization exponents: Score = Ratio^POW_B * Gap^POW_A
@@ -50,11 +51,13 @@ def get_node_positions(height, width):
 
 
 def draw_base_graph(ax, graph, pos, node_colors, scale_factor, title=None, vmax=None):
-    node_size = 450 * (scale_factor ** 2)
+    # Fig.11/12 (6x6): slightly smaller nodes + thicker edges than the plot_style default, so the
+    # graph structure is legible and one can see it is the same lattice across the algorithm steps.
+    node_size = 380 * (scale_factor ** 2)
     vmax = np.max(node_colors) if vmax is None else vmax
 
-    nx.draw_networkx_edges(graph, pos, ax=ax, edge_color=EDGE_COLOR, alpha=EDGE_ALPHA, width=EDGE_WIDTH)
-    nx.draw_networkx_nodes(
+    nx.draw_networkx_edges(graph, pos, ax=ax, edge_color="0.5", alpha=0.9, width=1.5)
+    nodes = nx.draw_networkx_nodes(
         graph,
         pos,
         ax=ax,
@@ -70,6 +73,7 @@ def draw_base_graph(ax, graph, pos, node_colors, scale_factor, title=None, vmax=
     ax.axis("off")
     if title:
         ax.set_title(title, fontsize=9)
+    return nodes
 
 
 def highlight_nodes(ax, graph, pos, nodes, color, scale_factor):
@@ -111,9 +115,13 @@ def main():
     maps = {k: calculate_excitability_map(left_vecs, right_vecs, k, N) for k in [1, 2, 3]}
     b_map_1 = maps[1]
 
-    fig1, axs1 = plt.subplots(1, 3, figsize=(WIDTH_FULL, WIDTH_FULL * 0.4), layout="constrained")
+    fig1, axs1 = plt.subplots(1, 3, figsize=(WIDTH_FULL, WIDTH_FULL * 0.5), layout="constrained")
     for i, k in enumerate([1, 2, 3]):
-        draw_base_graph(axs1[i], graph, pos, maps[k], scale_factor, title=f"$k={k}$")
+        nc = draw_base_graph(axs1[i], graph, pos, maps[k], scale_factor, title=f"$k={k}$")
+        cb = fig1.colorbar(nc, ax=axs1[i], orientation="horizontal", fraction=0.05, pad=0.03)
+        cb.ax.tick_params(labelsize=8)
+        if i == 1:
+            cb.set_label(r"local excitability $|c_k(\rho_i)|^2$", fontsize=8)
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     save_pdf(fig1, str(FIG_DIR / "Step1_Three_Modes.pdf"))
 
@@ -145,6 +153,17 @@ def main():
     else:
         cold_diag = np.abs(vec_cold_score.reshape((N, N)).diagonal())
         cold_nodes = list(np.where(cold_diag > 1e-9)[0])
+
+    # --- fig12: final hot / cold state panels on the k=1 excitability map ---
+    for tag, selection, color in [("final_hot_state", [hot_node], "red"),
+                                  ("final_cold_state", cold_nodes, "blue")]:
+        figX, axX = plt.subplots(figsize=(WIDTH_COL, WIDTH_COL * 0.95), layout="constrained")
+        nc = draw_base_graph(axX, graph, pos, b_map_1, scale_factor)
+        highlight_nodes(axX, graph, pos, selection, color, scale_factor)
+        cbX = figX.colorbar(nc, ax=axX, fraction=0.046, pad=0.04)
+        cbX.ax.tick_params(labelsize=8)
+        cbX.set_label(r"$|c_1(\rho_i)|^2$", fontsize=8)
+        save_pdf(figX, str(FIG_DIR / f"{tag}.pdf"))
 
     fig2, ax2 = plt.subplots(figsize=(7, 7))
     draw_base_graph(ax2, graph, pos, b_map_1, scale_factor, title="Step 2: Hot node from dark region")

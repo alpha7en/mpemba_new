@@ -2,6 +2,7 @@ numpy
 scipy
 matplotlib
 networkx
+python-louvain
 joblib
 numba
 pytest

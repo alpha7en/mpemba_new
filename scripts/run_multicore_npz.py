@@ -1,5 +1,13 @@
-import concurrent.futures
 import os
+
+# Pin BLAS to 1 thread per worker. With a process pool, every worker's multithreaded BLAS
+# otherwise spawns ~cpu_count threads, so 8 workers x 16 threads = 128 threads fight over
+# 16 cores and throughput collapses (~12x slowdown observed). Must be set BEFORE numpy is
+# imported -- here in the parent, and in spawned workers which inherit this environment.
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+    os.environ.setdefault(_v, "1")
+
+import concurrent.futures
 import time
 
 import numpy as np
