@@ -291,7 +291,7 @@ Subsequently, we performed a time-evolution simulation for these states to verif
 
 \begin{figure}[H]
     \centerline{\includegraphics[width=1\linewidth]{figures/9states_modes_simulation_line_10x10_with_selection_ENG}}
-    \caption{Relaxation dynamics of the $10\times 10$ lattice system shown as the time evolution of the distance to equilibrium $D(\rho(t))$ for eight distinct initial states (see Fig.~\ref{fig:9states}). The crossing of trajectories (bold) represents the Mpemba effect, which is most clearly observed for state pairs (3 and 5) and (4 and 5).}
+    \caption{Relaxation dynamics of the $10\times 10$ lattice system shown as the time evolution of the distance to equilibrium $D(\rho(t))$ for eight distinct initial states (see Fig.~\ref{fig:9states}). The crossing of trajectories (bold) represents the Mpemba effect, which is observed for the state pair (2 and 5).}
     \label{fig:simulation_lattice_10x10}
 \end{figure}
 
@@ -377,7 +377,7 @@ To establish a baseline for our spectral analysis, Fig.~\ref{fig:rewired_spectra
     \includegraphics[width=1\linewidth]{figures/with_examples_3}
 \end{subfigure}
 }
-\caption{Representative Liouvillian spectra for rewired $10\times 10$ lattices at increasing disorder levels ($p=0$, $p=0.1$, $p=0.3$). The regular lattice exhibits a structured spectrum with degeneracies tied to symmetry; rewiring lifts degeneracies and progressively smears spectral branches. The eigenvalues closest to zero (rightmost points) correspond to the slowest relaxation modes.}
+\caption{Representative Liouvillian spectra for rewired $10\times 10$ lattices at increasing disorder levels ($p=0.01$, $p=0.1$, $p=0.3$). At weak disorder ($p=0.01$) the spectrum retains the structured, near-degenerate branches inherited from the lattice symmetry; increasing the rewiring probability lifts these degeneracies and progressively smears the spectral branches. The eigenvalues closest to zero (rightmost points) correspond to the slowest relaxation modes.}
 \label{fig:rewired_spectra}
 \end{figure}
 
@@ -542,12 +542,12 @@ As evidenced by the preceding analyses of the spectral gap (see fig \ref{fig:mod
 To visualize the spatial structure, we construct a local excitability map by calculating the value $B(k, i)$ for each site $i$ according to Eq.~(\ref{local_excitability}). Since the specific network topology is random for a fixed rewiring probability $p$, we generate a statistical ensemble of graph realizations. From this set, a ``typical representative'' is selected. As the selection criterion, we use the median average shortest path length $L_{avg}$ of the ensemble. This specific metric is chosen not because of any \textit{a priori} correlation with quantum relaxation dynamics, but because it is a fundamental macroscopic descriptor of networks. By targeting the $L_{avg}$, we ensure that the selected graph possesses a generic, statistically representative topology.
 
 \begin{figure}[H]
-    \centerline{\includegraphics[width=0.75\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part1}}
+    \centerline{\includegraphics[width=\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part1}}
     \caption{Statistical distribution of the average shortest path length ($L_{avg}$) used to select a representative network topology at a fixed $p=0.15$. The horizontal axis represents the topological metric $L_{avg}$, the vertical axis displays the frequency of occurrences across an ensemble of randomly generated graph realizations (ensemble size $N = 2000$). The red dashed vertical line marks the median of the distribution. Selecting the network realization closest to this median ensures that the subsequent spatial excitability analysis (Fig.~\ref{fig:excib_maps_represent}) is performed on a typical architecture, thereby avoiding statistically anomalous configurations.}
     \label{fig:placeholder}
 \end{figure}
 \begin{figure}[H]
-    \centerline{\includegraphics[width=0.75\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part2}}
+    \centerline{\includegraphics[width=\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part2}}
     \caption{Spatial maps of local excitability $B(k, i)$ (Eq.\ref{eq:B_k_i}) for the first three non-trivial relaxation modes ($k=1, 2, 3$) on a rewired $10 \times 10$ lattice ($p = 0.15$). Each lattice node represents a waveguide site. The color scale and marker size quantitatively encode the relative magnitude of the excitability: bright (yellow/red) nodes act as topological hubs that strongly couple to the respective mode upon local single-photon injection, whereas dark (purple/black) nodes represent topological voids that are effectively decoupled from the mode.}
     \label{fig:excib_maps_represent}
 \end{figure}

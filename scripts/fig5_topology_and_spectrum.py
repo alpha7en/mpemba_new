@@ -1,5 +1,5 @@
 """Fig. 5 (rewired_spectra): three panels with_examples_1/2/3 for a 10x10 lattice at
-increasing disorder (p=0, 0.1, 0.3). Each panel = the graph topology (top, rewired edges
+increasing disorder (p=0.01, 0.1, 0.3). Each panel = the graph topology (top, rewired edges
 highlighted) + the Liouvillian eigenvalue spectrum in the complex plane (bottom). Only the
 plotting is styled; the spectrum computation (dense eig) is unchanged and cached.
 """
@@ -26,7 +26,8 @@ CACHE = PRECALC / "fig5_spectra.npz"
 H = W = 10
 N = H * W
 J, GAMMA = 1.0, 0.1
-P_VALUES = [0.0, 0.1, 0.3]
+P_VALUES = [0.01, 0.1, 0.3]  # weak/medium/strong disorder; p=0.01 (not 0) so a few rewired
+#                              edges are visible, resolving the original "p=0 with rewired edges"
 N_PLOT = 200
 
 
@@ -79,13 +80,14 @@ def draw_spectrum(ax, lambdas):
 
 def main():
     apply_style()
-    if CACHE.exists():
-        z = np.load(CACHE)
+    ps = np.array(P_VALUES, dtype=float)
+    z = np.load(CACHE) if CACHE.exists() else None
+    if z is not None and "ps" in z.files and np.allclose(z["ps"], ps):
         taus, lams = z["taus"], z["lams"]
     else:
         taus, lams = compute()
         PRECALC.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(CACHE, taus=taus, lams=lams)
+        np.savez_compressed(CACHE, taus=taus, lams=lams, ps=ps)
 
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     for i in range(len(P_VALUES)):

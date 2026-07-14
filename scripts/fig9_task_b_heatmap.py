@@ -65,7 +65,8 @@ def main():
         np.savez_compressed(CACHE, metric_values=metric_values, tau=rep_tau, rep_val=rep_val, maps=maps)
 
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    w = 0.75 * WIDTH_FULL
+    # w = 0.75 * WIDTH_FULL
+    w = WIDTH_FULL
 
     # --- part 1: L_avg selection histogram ---
     fig1, ax = plt.subplots(figsize=(w, w * 0.5), layout="constrained")

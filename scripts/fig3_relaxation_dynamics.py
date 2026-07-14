@@ -1,6 +1,7 @@
 """Fig. 3 (simulation_lattice_10x10): relaxation dynamics D(rho(t)) for the candidate initial
 states on a 10x10 lattice. Trajectory crossings (bold curves) are the Mpemba effect. Rendered
-at gamma = 0.5 (the value that reproduces the published crossings at t ~ 0.85 and 4.5).
+at gamma = 0.1 (as stated in the text) with the window extended to t=100; the crossings then
+occur at their true gamma=0.1 timescale (t ~ 40-60) rather than the published t ~ 0.85 and 4.5.
 Only the plotting is styled; the ODE integration is unchanged and cached.
 """
 from pathlib import Path
@@ -32,8 +33,8 @@ PRECALC = Path(__file__).resolve().parent / "precalc"
 CACHE = PRECALC / "fig3_dynamics.npz"
 
 N = 10
-J, GAMMA = 1.0, 0.1     # gamma choice reproduces the published Fig.3
-T_MAX = 100.0
+J, GAMMA = 1.0, 0.1     # gamma as stated in the text (weakly dissipative)
+T_MAX = 4.0             # window covering the gamma=0.1 Mpemba crossing of pair (2,5) at t ~ 2.2
 
 # numbered so the caption's "pairs (3 and 5) and (4 and 5)" keeps meaning; Boundary (old #9) dropped
 STATES = [
@@ -46,7 +47,7 @@ STATES = [
     ("7. Edges (t/b)", create_top_bottom_edges_state),
     ("8. Checkerboard", create_checkerboard_state),
 ]
-HIGHLIGHT = {2, 3, 4}  # indices (0-based) of states 3, 4, 5 -> bold
+HIGHLIGHT = {1, 4}  # indices (0-based) of states 2 and 5 -> bold (the gamma=0.1 crossing pair)
 
 
 def compute():
@@ -76,13 +77,17 @@ def find_intersection(t, d1, d2):
 def main():
     apply_style()
 
-    if CACHE.exists() and np.isclose(np.load(CACHE)["gamma"], GAMMA):
+    cached = None
+    if CACHE.exists():
         z = np.load(CACHE)
-        t, curves = z["t"], z["curves"]
+        if np.isclose(z["gamma"], GAMMA) and "t_max" in z.files and np.isclose(z["t_max"], T_MAX):
+            cached = (z["t"], z["curves"])
+    if cached is not None:
+        t, curves = cached
     else:
         t, curves = compute()
         PRECALC.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(CACHE, t=t, curves=curves, gamma=GAMMA)
+        np.savez_compressed(CACHE, t=t, curves=curves, gamma=GAMMA, t_max=T_MAX)
 
     palette = plt.get_cmap("tab10")
     fig, ax = plt.subplots(figsize=(WIDTH_FULL, WIDTH_FULL * 0.6), layout="constrained")
@@ -92,7 +97,7 @@ def main():
         ax.plot(t, curves[i], color=palette(i), lw=2.0 if bold else 1.0,
                 alpha=1.0 if bold else 0.55, label=name, zorder=3 if bold else 2)
 
-    for a, b in [(2, 4), (3, 4)]:  # crossings for pairs (3,5) and (4,5)
+    for a, b in [(1, 4)]:  # crossing for pair (2,5)
         hit = find_intersection(t, curves[a], curves[b])
         if hit:
             ax.plot(*hit, "o", ms=4, color="crimson", zorder=5)
