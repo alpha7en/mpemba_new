@@ -16,7 +16,6 @@ from qdyn_research.liouvillian import build_liouvillian_dense
 from qdyn_research.metrics import calculate_excitability_map, entropic_distance, get_projection_coefficient
 from qdyn_research.mpemba import find_guaranteed_mpemba_dense
 from qdyn_research.spectral import analyze_liouvillian_modes_dense_strict
-from qdyn_research.topology import generate_rewired_grid_tau_guaranteed_connectivity
 from qdyn_research.plot_style import (apply_style, save_pdf, WIDTH_FULL, WIDTH_COL, SEQ_CMAP,
                                       EDGE_WIDTH, EDGE_COLOR, EDGE_ALPHA)
 
@@ -97,10 +96,17 @@ def load_or_build_system():
         obj = joblib.load(CHECKPOINT)
         return obj.tau, obj.L, obj.evals, obj.left_vecs, obj.right_vecs
 
-    tau = generate_rewired_grid_tau_guaranteed_connectivity(HEIGHT, WIDTH, TARGET_P)
-    liouvillian = build_liouvillian_dense(tau, J, GAMMA)
+    # No checkpoint: rebuild from the canonical paper graph (scripts/precalc/paper_graph_*.npz,
+    # git-tracked) so the figure always shows the exact realization published in the paper.
+    # NOTE: eigenvalues must be sorted by Re (descending) exactly as MpembaValidator does,
+    # otherwise mode_idx=1 would address a different mode than in the checkpoint path.
+    graph_npz = os.path.join(os.path.dirname(CHECKPOINT), "paper_graph_6x6_p015.npz")
+    z = np.load(graph_npz)
+    tau = z["tau"]
+    liouvillian = build_liouvillian_dense(tau, float(z["J"]), float(z["gamma"]))
     evals, left_vecs, right_vecs = analyze_liouvillian_modes_dense_strict(liouvillian)
-    return tau, liouvillian, evals, left_vecs, right_vecs
+    idx = np.argsort(evals.real)[::-1]
+    return tau, liouvillian, evals[idx], left_vecs[:, idx], right_vecs[:, idx]
 
 
 def main():

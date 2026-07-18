@@ -24,9 +24,11 @@ PRECALC = Path(__file__).resolve().parent / "precalc"
 
 
 def find_npz():
-    cands = glob.glob(str(PRECALC / "rewiring_spectrum_data_*.npz")) + glob.glob("rewiring_spectrum_data_*.npz")
+    """Newest spectral archive in precalc/ or cwd (canonical: spectrum_sweep_10x10.npz)."""
+    pats = ["spectrum_sweep_*.npz", "rewiring_spectrum_data_*.npz"]
+    cands = [c for p in pats for c in glob.glob(str(PRECALC / p)) + glob.glob(p)]
     if not cands:
-        raise FileNotFoundError("no rewiring_spectrum_data_*.npz in scripts/precalc or cwd")
+        raise FileNotFoundError("no spectral sweep npz in scripts/precalc or cwd")
     return max(cands, key=os.path.getctime)
 
 

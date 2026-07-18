@@ -36,7 +36,13 @@ BASE = "Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited"
 
 
 def compute():
-    """2000-graph ensemble -> median-L_avg representative -> dense eig -> B(k,i). Unchanged."""
+    """2000-graph ensemble -> median-L_avg representative -> dense eig -> B(k,i). Unchanged.
+
+    The paper's representative realization is stored in the cache (fig9_representative.npz,
+    including its tau). This fresh-run path is only taken when the cache is absent; seeding the
+    ensemble once makes that regeneration deterministic (a different but reproducible graph)."""
+    import random
+    random.seed(2026)
     candidates, metric_values = [], []
     for _ in range(NUM_SEARCH_ITERATIONS):
         tau = generate_rewired_grid_tau_guaranteed_connectivity(HEIGHT, WIDTH, TARGET_P)

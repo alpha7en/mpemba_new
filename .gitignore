@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# IDE
+.idea/
+
+# Large precomputed data: regenerable from seeded scripts (see docs/REPRODUCING.md).
+# Small canonical artifacts (fig caches, dirichlet benchmark, paper graph) stay in git.
+scripts/precalc/*.pkl
+scripts/precalc/spectrum_sweep_*.npz
+scripts/precalc/rewiring_spectrum_data_*.npz
+
+# Legacy pre-reformat figure exports (superseded by paper/figures/*.pdf; kept locally only)
+scripts/*.png
+scripts/IPR from p images ENG/
+scripts/visualisation_plots_ENG_captions/
+
+# Session working files (reviewer-comment screenshots)
+paper/rev_*.png
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/*.toc
