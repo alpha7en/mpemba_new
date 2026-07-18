@@ -1,9 +1,11 @@
 """Fig. 6 (modes_log_scale): mean Re(lambda_k) vs rewiring probability p, and the
-spectral gap Re(lambda_1 - lambda_2), on a log-p axis, with run-to-run error bars.
+slow-mode separation Re(lambda_1 - lambda_2), on a log-p axis, with run-to-run error bars.
+
+Note: Re(lambda_1 - lambda_2) is the separation between the two slowest modes, NOT the
+conventional Liouvillian relaxation gap -Re(lambda_1) (which is panel (a), Re(lambda_1)).
 
 Reads the precomputed spectral archive (rewiring_spectrum_data_*.npz). Only the
-plotting is styled here; the data reduction (mean/std over runs, gap definition)
-is unchanged from the original script.
+plotting is styled here; the data reduction (mean/std over runs) is unchanged.
 """
 import glob
 import os
@@ -57,7 +59,7 @@ def main():
         _log_errorbar(p_pos, avg, std, rf"$\mathrm{{Re}}(\lambda_{k})$", color,
                       f"mode_{k}_p_log_ENG.pdf")
 
-    # --- spectral gap Re(lambda_1) - Re(lambda_2) ---
+    # --- slow-mode separation Re(lambda_1) - Re(lambda_2) (not the Liouvillian gap -Re(lambda_1)) ---
     avg_gap = [np.mean([arr[1].real - arr[2].real for arr in grouped[p] if len(arr) > 2]) for p in p_pos]
     std_gap = [np.std([arr[1].real - arr[2].real for arr in grouped[p] if len(arr) > 2]) for p in p_pos]
     _log_errorbar(p_pos, avg_gap, std_gap, r"$\mathrm{Re}(\lambda_1-\lambda_2)$", LINE_COLORS[3],

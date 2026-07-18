@@ -107,7 +107,10 @@ def main():
     ax.set_xlabel("time $t$")
     ax.set_ylabel(r"distance to equilibrium $D(\rho(t))$")
     ax.grid(True, ls="--", lw=0.4, alpha=0.5)
-    ax.legend(loc="upper right", fontsize=8, ncol=1, handlelength=1.6, labelspacing=0.3)
+    # legend outside the axes (right): 8 monotone curves fill the whole panel, so no in-panel
+    # spot is free; constrained_layout reserves the space and nothing overlaps the curves.
+    ax.legend(loc="center left", bbox_to_anchor=(1.01, 0.5), fontsize=8, ncol=1,
+              handlelength=1.6, labelspacing=0.3)
 
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     save_pdf(fig, str(FIG_DIR / "9states_modes_simulation_line_10x10_with_selection_ENG.pdf"))
