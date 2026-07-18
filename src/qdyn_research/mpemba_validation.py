@@ -67,11 +67,14 @@ def simulation_worker_spectral(rho_hot, rho_cold, time_points, n, evals, right_v
 class MpembaValidator:
     """Environment for testing Mpemba-state search on one rewired network realization."""
 
-    def __init__(self, height=5, width=5, p=0.1, J=1.0, gamma=0.1):
+    def __init__(self, height=5, width=5, p=0.1, J=1.0, gamma=0.1, seed=None):
+        """seed: optional int fixing the rewired-topology realization (passed to the topology
+        generator). State sampling (`generate_random_*`) uses the global np.random state; seed it
+        in the driver script (see scripts/run_dirichlet_benchmark.py) for reproducible ensembles."""
         self.n = height * width
-        self.params = {"h": height, "w": width, "p": p, "J": J, "gamma": gamma}
+        self.params = {"h": height, "w": width, "p": p, "J": J, "gamma": gamma, "seed": seed}
 
-        self.tau = generate_rewired_grid_tau_guaranteed_connectivity(height, width, p)
+        self.tau = generate_rewired_grid_tau_guaranteed_connectivity(height, width, p, seed=seed)
         self.L = build_liouvillian_dense(self.tau, J, gamma)
 
         self.evals, self.left_vecs, self.right_vecs = analyze_liouvillian_modes_dense_strict(self.L)
@@ -119,9 +122,9 @@ class MpembaValidator:
         return rho.flatten(order="C")
 
     def generate_random_diag_density_matrix(self):
-        """Generate classical diagonal rho with random populations (sum_i p_i = 1)."""
-        populations = np.random.random(self.n)
-        populations /= np.sum(populations)
+        """Generate classical diagonal rho with populations sampled uniformly over the
+        probability simplex, p ~ Dirichlet(1, ..., 1) (unbiased simplex coverage)."""
+        populations = np.random.dirichlet(np.ones(self.n))
         rho = np.diag(populations).astype(complex)
         return rho.flatten(order="C")
 

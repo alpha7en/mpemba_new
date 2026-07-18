@@ -608,16 +608,16 @@ This scoring formula acts as a balance between two fundamental requirements for 
 \subsection{Monte Carlo Benchmark and Applicability Limits}
 \textcolor{dark-green}{Defining a universal, cross-system metric for the 'strength' of the QME remains a non-trivial challenge in open quantum systems, since absolute trajectory crossing times ($t^*$) are highly sensitive to the initial distance gap between states.} Since evaluating absolute optimality is hindered by this dependence, we evaluated the efficacy of the proposed deterministic algorithm by benchmarking it against a random Monte Carlo search within the fixed $6 \times 6$ network topology.
 
-To ensure a physically meaningful comparison, we generated an ensemble of 10,000 randomly selected pairs of diagonal density matrices. The populations of these random states were sampled from a uniform Dirichlet distribution, $p \sim \mathrm{Dirichlet}(1, \dots, 1)$, ensuring unbiased coverage of the probability simplex. Furthermore, to filter out trivial micro-crossings caused by state pairs starting infinitesimally close to each other, we applied a gap filter: the initial relative entropy gap of a random pair was required to be at least 10\% of the gap engineered by our algorithm. 
+To ensure a physically meaningful comparison, we generated an ensemble of random pairs of diagonal density matrices whose populations were sampled from a uniform Dirichlet distribution, $p \sim \mathrm{Dirichlet}(1, \dots, 1)$, ensuring unbiased coverage of the probability simplex. To discard trivial micro-crossings between states starting infinitesimally close, we applied a gap filter: the initial relative-entropy gap of a pair was required to be at least 10\% of the gap engineered by our algorithm, yielding an ensemble of 30\,000 admissible pairs. 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/alg_compare}
-    \caption{Statistical validation of the deterministic algorithm. The histogram displays the distribution of crossing times ($t^*$) for 10,000 randomly generated valid pairs of diagonal initial states on the $6 \times 6$ network ($p=0.15$). The vertical dashed red line marks the extremely short crossing time ($t^* = 44.72$) achieved by the deterministically engineered pair from Fig.~\ref{fig:step_hot_cold_selection}. The algorithmic pair drastically outperforms the vast majority of random configurations, sitting in the extreme left tail of the distribution.}
+    \caption{Statistical validation of the deterministic algorithm. The histogram shows the distribution of crossing times $t^*$ for an ensemble of 30\,000 admissible random pairs (Dirichlet-sampled diagonal states) on the $6 \times 6$ network ($p=0.15$). The vertical dashed line marks the crossing time ($t^* = 44.7$) of the deterministically engineered pair from Fig.~\ref{fig:step_hot_cold_selection}: only $1.2\%$ of the admissible pairs cross faster. Crossings beyond $t \approx 160$, where both trajectories have relaxed to within the numerical resolution of equilibrium, are not physically resolved and are omitted.}
     \label{fig:algorithm_test}
 \end{figure}
 
-As illustrated by the histogram in Fig.~\ref{fig:algorithm_test}, the deterministically engineered pair significantly outperforms the random search, positioning the crossing time in the extreme lower (fastest) percentile of the distribution. \textcolor{dark-green}{Varying the threshold of the gap filter between 5\% and 20\% confirmed that the percentile rank of the algorithmic pair remains stable, verifying the robustness of this comparative evaluation.}
+As illustrated in Fig.~\ref{fig:algorithm_test}, the deterministically engineered pair significantly outperforms the random search: only about $1.2\%$ of the admissible random pairs achieve a faster crossing.
 
 \textcolor{dark-green}{Finally, we note the physical limits of applicability for the proposed proof-of-concept heuristic. The current algorithm relies exclusively on the spatial excitability structure of the single fundamental mode $v_1$. Consequently, its validity is contingent upon the network possessing a strongly localized slowest mode that is separated from the rest of the spectrum by a distinct eigenvalue gap. In arbitrary random ensembles, topological fluctuations can lead to quasi-degeneracies ($\lambda_1 \approx \lambda_2$) or delocalization of the fundamental mode, which would necessitate accounting for higher-order relaxation channels. The generalization of this geometric approach to multi-mode heuristics across broad topological ensembles remains a subject for future investigation.}
 % \section{Future Work}
@@ -675,10 +675,10 @@ for the first mode, and distributes the ``cold''
 (closer-to-equilibrium, slow-relaxing) state across the $M$ brightest
 nodes, with $M$ optimized via a scoring function that balances the
 projection ratio and the initial distance gap. A benchmark against
-$10\,000$ randomly sampled diagonal state pairs on a $6 \times 6$
-lattice at $p = 0.15$ confirmed that the algorithmically engineered
-pair achieves a crossing time $t^{*}$ in the extreme lower percentile
-of the distribution, validating the approach as a proof of concept.
+$30\,000$ admissible random diagonal-state pairs on a $6 \times 6$
+lattice at $p = 0.15$ confirmed that only about $1.2\%$ of them
+achieve a faster crossing than the algorithmically engineered pair,
+validating the approach as a proof of concept.
 
 Several directions for future work merit attention.
 The present analysis is restricted to incoherent (diagonal) initial
