@@ -1,7 +1,7 @@
 import warnings
 
 import numpy as np
-from scipy.linalg import logm
+from scipy.linalg import logm, lu_factor, lu_solve
 
 
 def get_projection_coefficient(left_vec: np.ndarray, right_vec: np.ndarray, state_vec: np.ndarray):
@@ -25,6 +25,43 @@ def project_rho_on_modes(rho_initial: np.ndarray, left_vecs: np.ndarray, right_v
         proj = np.vdot(w_k, rho_vec)
         coeffs[k] = proj / norm if not np.isclose(norm, 0) else 0.0
     return coeffs
+
+
+def factor_mode_basis(right_vecs: np.ndarray):
+    """LU factorization of the right-eigenvector matrix V, for exact modal projections."""
+    return lu_factor(right_vecs)
+
+
+def project_rho_on_modes_exact(rho_initial: np.ndarray, lu_piv, right_vecs: np.ndarray, order: str = "F"):
+    """Exact modal coefficients: solve V c = vec(rho) instead of pairwise biorthogonal division.
+
+    Pairwise division c_k = <w_k|rho>/<w_k|v_k> is invalid inside degenerate multiplets
+    (LAPACK left/right eigenvectors are not biorthogonally paired there; on regular lattices
+    the reconstruction error can exceed 1e3 %). Solving the linear system V c = vec(rho) is the
+    exact decomposition regardless of degeneracy and needs no left eigenvectors.
+
+    Returns (coeffs, residual) where residual = ||V c - vec(rho)|| / ||vec(rho)|| is the
+    reconstruction-error control (should be ~1e-12; large values signal a defective basis).
+
+    Up to two steps of iterative refinement (re-using the LU) are applied: for states with a
+    large component in a nearly defective multiplet the raw backward error is eps*||V||*||c||
+    with ||c|| up to ~1e8, and refinement recovers most of the lost digits.
+    """
+    rho_vec = rho_initial.flatten(order)
+    b_norm = np.linalg.norm(rho_vec)
+    coeffs = lu_solve(lu_piv, rho_vec)
+    residual_vec = right_vecs @ coeffs - rho_vec
+    residual = float(np.linalg.norm(residual_vec) / b_norm)
+    for _ in range(2):
+        if residual < 1e-12:
+            break
+        coeffs = coeffs - lu_solve(lu_piv, residual_vec)
+        residual_vec = right_vecs @ coeffs - rho_vec
+        new_residual = float(np.linalg.norm(residual_vec) / b_norm)
+        if new_residual >= residual:      # refinement stalled at the attainable floor
+            break
+        residual = new_residual
+    return coeffs, residual
 
 
 def calculate_excitability_map(left_vecs: np.ndarray, right_vecs: np.ndarray, k_idx: int, n: int):
