@@ -5,7 +5,7 @@ from collections import defaultdict
 import numpy as np
 
 from .liouvillian import build_liouvillian_sparse
-from .spectral import analyze_liouvillian_modes_sparse_robust
+from .spectral import analyze_liouvillian_modes_rightmost, analyze_liouvillian_modes_sparse_robust
 from .topology import generate_rewired_grid_tau_guaranteed_connectivity
 
 
@@ -29,6 +29,31 @@ def run_single_sparse_rewiring_job(p, run_idx, height, width, j, gamma, num_mode
         f"{prefix}_vectors": vectors,
         f"{prefix}_p_value": p,
         f"{prefix}_tau": tau,  # adjacency matrix saved for exact graph reproduction in fig8
+    }
+
+
+def run_single_sparse_rewiring_job_rightmost(p, run_idx, height, width, j, gamma, num_modes):
+    """CF-2-corrected sweep job: RIGHTMOST (max Re lambda) modes via the exponential transform.
+
+    The legacy job (run_single_sparse_rewiring_job) orders modes by |lambda| (shift-invert at
+    sigma~0) and misses the slowest oscillating multiplets entirely (on the regular 10x10 the
+    true rightmost quadruplet is the 1174th mode by |lambda|). This job uses
+    analyze_liouvillian_modes_rightmost, which orders by Re(lambda) directly and validates
+    every mode by its residual. Storage schema matches the legacy job (so parsing utilities
+    keep working) plus a per-mode residual array.
+    """
+    tau = generate_rewired_grid_tau_guaranteed_connectivity(height, width, p, seed=run_idx)
+    liouvillian = build_liouvillian_sparse(tau, j, gamma)
+    lambdas, vectors, residuals = analyze_liouvillian_modes_rightmost(liouvillian, num_modes=num_modes)
+    if lambdas is None:
+        return {}
+    prefix = f"p_{p}_run_{run_idx}"
+    return {
+        f"{prefix}_lambdas": lambdas,
+        f"{prefix}_vectors": vectors,
+        f"{prefix}_residuals": residuals,
+        f"{prefix}_p_value": p,
+        f"{prefix}_tau": tau,
     }
 
 

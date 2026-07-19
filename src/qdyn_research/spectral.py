@@ -62,3 +62,56 @@ def get_biorthogonal_modes_sparse_strict(liouvillian: csc_matrix, num_modes: int
 
     return vals_r, vecs_r, final_left
 
+
+
+def analyze_liouvillian_modes_rightmost(liouvillian: csc_matrix, num_modes: int,
+                                        t_transform: float = 25.0, resid_tol: float = 1e-8,
+                                        ncv: int | None = None):
+    """Rightmost (max Re lambda) eigenmodes via the exponential spectral transform.
+
+    Motivation (referee fix CF-2): shift-invert at sigma~0 orders modes by |lambda| and
+    therefore CANNOT find the slowest oscillating modes: on the regular 10x10 lattice the
+    true rightmost quadruplet lambda = -0.0803 +/- 0.239i has 1173 modes closer to zero.
+    Arnoldi on the propagator exp(L*T) instead orders modes by |exp(lambda*T)| = exp(Re(lambda)*T),
+    i.e. exactly by Re(lambda), with no need to guess where the oscillating band lies.
+
+    Implementation: matrix-free LinearOperator applying scipy's expm_multiply; eigenvalues are
+    recovered from the Rayleigh quotient lambda = <v|L|v>/<v|v> (NOT from log of the transformed
+    eigenvalue, which is Im-ambiguous mod 2*pi/T); every returned mode is validated by its
+    relative residual ||L v - lambda v|| / ||v|| <= resid_tol. Returns (lambdas, vectors,
+    residuals) sorted by decreasing Re(lambda); (None, None, None) on solver failure.
+
+    t_transform sets the spectral separation e^{dRe*T}; T=25 (=2.5/gamma for gamma=0.1)
+    suppresses the bulk (Re < -0.1) by >= e^{0.5} relative to the slow cluster while keeping
+    the number of internal expm steps moderate. A generous Krylov subspace (default
+    ncv = 4*num_modes) helps ARPACK split NEARLY degenerate multiplet copies; note that exact
+    copies/conjugate partners may still be represented once — single-vector Krylov spaces
+    contain one direction per distinct eigenvalue, which is sufficient for the sweep figures
+    (they need the distinct eigenvalue groups plus a representative eigenvector per group;
+    the lambda* partner has conjugate diagonal weights, so IPR/overlap are identical).
+    """
+    from scipy.sparse.linalg import expm_multiply
+
+    n = liouvillian.shape[0]
+    if ncv is None:
+        ncv = min(n, max(4 * num_modes, 40))
+    try:
+        op = LinearOperator((n, n), dtype=np.complex128,
+                            matvec=lambda x: expm_multiply(liouvillian * t_transform, x))
+        mu, vecs = eigs(op, k=num_modes, which="LM", ncv=ncv)
+    except Exception:
+        return None, None, None
+
+    lambdas = np.empty(num_modes, dtype=np.complex128)
+    residuals = np.empty(num_modes, dtype=np.float64)
+    for i in range(num_modes):
+        v = vecs[:, i]
+        v_norm2 = np.vdot(v, v).real
+        lam = np.vdot(v, liouvillian @ v) / v_norm2
+        lambdas[i] = lam
+        residuals[i] = np.linalg.norm(liouvillian @ v - lam * v) / np.sqrt(v_norm2)
+    if np.any(residuals > resid_tol):
+        return None, None, None
+
+    order = np.argsort(lambdas.real)[::-1]
+    return lambdas[order], vecs[:, order], residuals[order]
