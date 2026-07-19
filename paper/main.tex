@@ -44,10 +44,10 @@
 \section{Introduction} 
 %The Mpemba effect---the counter-intuitive observation that a system initially \emph{further} from equilibrium can relax to its stationary state \emph{faster} than one starting closer---has fascinated scientists since antiquity and was systematically documented by Mpemba and Osborne in 1969 for the case of hot water freezing faster than cold~\cite{Mpemba1969}. Despite half a century of debate in classical thermodynamics, the origin and generality of the effect remained elusive until a modern theoretical framework rooted in spectral analysis of relaxation dynamics was developed.  A key insight is that anomalous relaxation occurs when the initial state has a suppressed overlap with the slowest decaying eigenmode of the generator governing the dynamics, so that faster-decaying channels dominate the approach to equilibrium.  In the classical domain, this picture was confirmed experimentally in colloidal systems, where exponentially accelerated cooling was demonstrated in a controlled setting~\cite{Kumar2020}.
 
-The Mpemba effect is a counterintuitive relaxation phenomenon in which a system initially farther from equilibrium reaches its stationary state faster than one that starts closer. It was first systematically described by Mpemba and Osborne in 1969 for hot water freezing faster than cold~\cite{Mpemba1969}. Subsequent studies revealed that this effect is not limited to thermal systems but can be understood more generally through the spectral structure of relaxation dynamics. Within this framework, anomalously fast relaxation occurs when the initial state has a weak overlap with the slowest decaying eigenmode of the dynamical generator; the relaxation is then governed primarily by faster modes, and the system approaches equilibrium more quickly. This mechanism has been confirmed experimentally in classical colloidal systems, where accelerated cooling was observed under controlled conditions~\cite{Kumar2020}.
+The Mpemba effect is a counterintuitive relaxation phenomenon in which a system initially farther from equilibrium reaches its stationary state faster than one that starts closer. It was first systematically described by Mpemba and Osborne in 1969 for hot water freezing faster than cold~\cite{Mpemba1969}. Subsequent studies revealed that this effect is not limited to thermal systems but can be understood more generally through the spectral structure of relaxation dynamics --- a framework established for Markovian systems by Lu and Raz~\cite{Lu2017} and sharpened by the strong-Mpemba classification of Klich~\emph{et al.}~\cite{Klich2019}. Within this framework, anomalously fast relaxation occurs when the initial state has a weak overlap with the slowest decaying eigenmode of the dynamical generator; the relaxation is then governed primarily by faster modes, and the system approaches equilibrium more quickly. This mechanism has been confirmed experimentally in classical colloidal systems, where accelerated cooling was observed under controlled conditions~\cite{Kumar2020}.
 
-In quantum physics, the Mpemba effect acquires a richer structure. The \emph{Quantum Mpemba Effect} (QME) was discussed by Carollo,
-Lasanta, and Lesanovsky~\cite{Carollo2021}, who showed that in Markovian open quantum systems governed by a Lindblad master equation,
+In quantum physics, the Mpemba effect acquires a richer structure (see~\cite{AresReview2025} for a recent review). Transplanting the classical spectral mechanism~\cite{Lu2017,Klich2019} to the quantum domain, Carollo,
+Lasanta, and Lesanovsky~\cite{Carollo2021} showed that in Markovian open quantum systems governed by a Lindblad master equation,
 an appropriately engineered unitary rotation of the initial state can render it orthogonal to the slowest Liouvillian eigenmode, thereby
 \emph{exponentially} accelerating the approach to stationarity. This strong form of the QME relies on the spectral decomposition of
 the Liouvillian superoperator: if the overlap coefficient $c_1$ with the first non-trivial right eigenvector vanishes, the effective
@@ -58,13 +58,13 @@ In isolated many-body quantum systems, an analogous effect manifests
 through anomalous symmetry restoration: a tilted ferromagnet with
 \emph{greater} initial symmetry breaking can restore its symmetry
 \emph{faster} than one closer to the symmetric state, as probed
-via entanglement asymmetry.
+via entanglement asymmetry~\cite{Ares2023}.
 The  experimental observation of this phenomenon was reported by Joshi~\emph{et al.}~\cite{Joshi2024} using a trapped-ion quantum simulator, where the effect was monitored through randomized measurements and classical shadows.
 In the domain of open quantum systems, the strong QME---characterized
 by an exponentially accelerated approach to the steady state---was
 experimentally demonstrated in~\cite{Zhang2025} on a single trapped-ion qubit.
 In that work, the strong Mpemba condition was shown to coincide with a Liouvillian exceptional point,
-revealing a deep connection between anomalous relaxation and non-Hermitian physics. Photonic lattices provide a particularly natural and experimentally
+revealing a deep connection between anomalous relaxation and non-Hermitian physics. The thermodynamic content of the effect has likewise been analyzed in mesoscopic transport settings~\cite{Chatterjee2023} and through the lens of work and entropy production~\cite{Moroder2024}. Photonic lattices provide a particularly natural and experimentally
 accessible arena for studying the QME. In particular, Longhi~\cite{Longhi2024} demonstrated that the Mpemba effect arises
 in the diffusive dynamics of light in finite-sized photonic lattices under dephasing: certain highly localized initial intensity
 distributions reach the uniform (equilibrium) distribution faster than initially delocalized ones.  
@@ -138,7 +138,7 @@ We consider the quantum walk of a single photon in a network of coupled optical 
 \end{equation}
 where $\hat{a}_i^\dagger$ ($\hat{a}_i$) is the photon creation (annihilation) operator at site $i$, $J$ is the connection constant (hopping rate), which is the same for all nodes, and $\tau$ is the symmetric adjacency matrix of the $N$-node graph.
 
-To include environmental decoherence into our model, we employ the Lindblad master equation framework~\cite{lindblad1976,gks1976,breuer2002}. For a network of optical waveguides, the dominant source of decoherence is local dephasing, which is described by the local number operators acting as dissipators, $\hat{L}_k = \hat{a}_k^\dagger \hat{a}_k = \hat{n}_k$. The evolution of the system's density matrix $\hat{\rho}$ is given by:
+To include environmental decoherence into our model, we employ the Lindblad master equation framework~\cite{lindblad1976,gks1976,breuer2002}. For a network of optical waveguides, the dominant source of decoherence is local dephasing, which is described by the local number operators acting as dissipators, $\hat{L}_k = \hat{a}_k^\dagger \hat{a}_k = \hat{n}_k$. Coherent hopping supplemented by local dephasing places the model in the class of quantum stochastic walks, which interpolate between coherent quantum and classical diffusive transport~\cite{Whitfield2010}. The evolution of the system's density matrix $\hat{\rho}$ is given by:
 \begin{equation}
 \frac{d\hat{\rho}}{dt} = -i[\hat{H}, \hat{\rho}] + \gamma \sum_{k=1}^N \left( \hat{L}_k \hat{\rho} \hat{L}_k^\dagger - \frac{1}{2}\{\hat{L}_k^\dagger \hat{L}_k, \hat{\rho}\} \right),
 \end{equation}
@@ -298,7 +298,7 @@ Subsequently, we performed a time-evolution simulation for these states to verif
 \textcolor{green}{\section{Network Rewiring}}
 We now modify the lattice structure by randomly rewiring a fraction of the edges. This process involves switching edge endpoints, thereby conserving the total number of edges in the system. The topology is governed by the parameter $p \in [0, 1]$, representing the rewiring probability for each initial edge. For an open $n \times n$ square lattice, the exact number of undirected edges is $E = 2n(n-1)$. Consequently, the expected number of rewired edges is precisely $\langle E_{\mathrm{rew}} \rangle = 2n(n-1)p$.
 
-In the context of open quantum systems, network fragmentation produces multiple degenerate stationary states, which invalidates the spectral decomposition of the Liouvillian. Therefore, we must strictly enforce the global connectivity of the network. We achieve this through a Monte Carlo rejection sampling procedure, detailed in Algorithm~\ref{alg:rewiring}.
+In the context of open quantum systems, network fragmentation produces multiple degenerate stationary states---mirroring the classical correspondence between the multiplicity of the graph-Laplacian zero eigenvalue and the number of connected components~\cite{fiedler1973}---which invalidates the spectral decomposition of the Liouvillian. Therefore, we must strictly enforce the global connectivity of the network. We achieve this through a Monte Carlo rejection sampling procedure, detailed in Algorithm~\ref{alg:rewiring}.
 
 \begin{algorithm}[H]
 \caption{Connectivity-Guaranteed Edge Rewiring}
