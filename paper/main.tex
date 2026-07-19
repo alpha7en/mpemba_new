@@ -132,13 +132,13 @@ for future work.
 \section{Model}
 
 \subsection{Hamiltonian of Single-Photon Walk on a Graph}
-We consider the quantum walk of a single photon in a network of coupled optical waveguides~\cite{tang2018}. In the tight-binding approximation, the dynamics of the system are governed by the Hamiltonian:
+We consider the quantum walk of a single photon in a network of coupled optical waveguides~\cite{tang2018}. In such arrays the role of time is played by the propagation distance along the waveguides, so all temporal dynamics below translates directly into evolution along the sample~\cite{tang2018,Longhi2024}. In the tight-binding approximation, the dynamics of the system are governed by the Hamiltonian:
 \begin{equation}
 \hat{H} = -\frac{J}{2}\sum_{i,j} \tau_{ij}(\hat{a}_i^{\dagger}\hat{a}_j + \hat{a}_j^{\dagger}\hat{a}_i),
 \end{equation}
 where $\hat{a}_i^\dagger$ ($\hat{a}_i$) is the photon creation (annihilation) operator at site $i$, $J$ is the connection constant (hopping rate), which is the same for all nodes, and $\tau$ is the symmetric adjacency matrix of the $N$-node graph.
 
-To include environmental decoherence into our model, we employ the Lindblad master equation framework~\cite{lindblad1976,gks1976,breuer2002}. For a network of optical waveguides, the dominant source of decoherence is local dephasing, which is described by the local number operators acting as dissipators, $\hat{L}_k = \hat{a}_k^\dagger \hat{a}_k = \hat{n}_k$. Coherent hopping supplemented by local dephasing places the model in the class of quantum stochastic walks, which interpolate between coherent quantum and classical diffusive transport~\cite{Whitfield2010}. The evolution of the system's density matrix $\hat{\rho}$ is given by:
+To include environmental decoherence into our model, we employ the Lindblad master equation framework~\cite{lindblad1976,gks1976,breuer2002}. For a network of optical waveguides, the dominant source of decoherence is local dephasing, which is described by the local number operators acting as dissipators, $\hat{L}_k = \hat{a}_k^\dagger \hat{a}_k = \hat{n}_k$. Coherent hopping supplemented by local dephasing places the model in the class of quantum stochastic walks, which interpolate between coherent quantum and classical diffusive transport~\cite{Whitfield2010}. Physically, pure dephasing captures the random propagation-constant fluctuations induced by fabrication disorder and environmental noise, which destroy inter-site phase coherence while conserving the photon number; this is the dominant decoherence channel considered in photonic realizations of anomalous relaxation~\cite{Longhi2024}. Uniform propagation losses --- the other ubiquitous imperfection --- factor out of the single-photon sector as a global attenuation and leave the \emph{normalized} relaxation dynamics, and hence all trajectory crossings studied below, unchanged; site-resolved loss engineering is beyond the scope of this work. The evolution of the system's density matrix $\hat{\rho}$ is given by:
 \begin{equation}
 \frac{d\hat{\rho}}{dt} = -i[\hat{H}, \hat{\rho}] + \gamma \sum_{k=1}^N \left( \hat{L}_k \hat{\rho} \hat{L}_k^\dagger - \frac{1}{2}\{\hat{L}_k^\dagger \hat{L}_k, \hat{\rho}\} \right),
 \end{equation}
@@ -178,7 +178,7 @@ L = iJ(I \otimes \tau - \tau \otimes I) + L_D,
 \end{equation}
 where $I$ is the $N \times N$ identity matrix, and $L_D$ is a diagonal matrix with elements equal to $0$ for components corresponding to populations ($\rho_{k,k}$) and $-\gamma$ for coherences ($\rho_{k,l}$).\
 
-Throughout the subsequent numerical analysis, we define the time scale in units of the inverse hopping rate, effectively setting \textbf{$J=\frac{1}{2}$}. The dephasing rate is fixed at \textbf{$\gamma=0.1$}. This specific ratio ($\gamma/J = 0.2$) places the system in a weakly dissipative regime where coherent dynamics remains appreciable on the relaxation time scale.
+Throughout the subsequent numerical analysis, we define the time scale in units of the inverse hopping rate, effectively setting \textbf{$J=\frac{1}{2}$} (all times below are quoted in these dimensionless units; in a waveguide implementation they correspond to propagation distance measured in units of the inverse coupling constant). The dephasing rate is fixed at \textbf{$\gamma=0.1$}. This specific ratio ($\gamma/J = 0.2$) places the system in a weakly dissipative regime where coherent dynamics remains appreciable on the relaxation time scale.
 
 
 \textbf{}
@@ -330,7 +330,7 @@ In the context of open quantum systems, network fragmentation produces multiple 
 \end{algorithmic}
 \end{algorithm}
 
-To prevent the creation of self-loops and multi-edges, target nodes are restricted to the set $\mathcal{V}_{\text{valid}}$. If no valid targets remain for a selected edge, its rewiring is simply bypassed (lines 11--14). Disconnected realizations are discarded via Breadth-First Search (BFS) validation (lines 17--19). Finally, to guarantee the exact reproducibility of the representative single-graph spatial maps presented in subsequent sections, the generator is initialized with a fixed seed. For statistical ensemble averaging, the seed varies to ensure independent sampling.
+To prevent the creation of self-loops and multi-edges, target nodes are restricted to the set $\mathcal{V}_{\text{valid}}$. If no valid targets remain for a selected edge, its rewiring is simply bypassed (lines 11--14). Disconnected realizations are discarded via Breadth-First Search (BFS) validation (lines 17--19). This rejection step conditions the statistical ensemble on global connectivity: the acceptance fraction is essentially unity for $p \lesssim 0.05$, decreases to ${\approx}86\%$ at $p=0.3$, and reaches ${\approx}20\%$ at $p=1$, so ensemble averages at strong rewiring refer to the connected subensemble. Finally, to guarantee the exact reproducibility of the representative single-graph spatial maps presented in subsequent sections, the generator is initialized with a fixed seed. For statistical ensemble averaging, the seed varies to ensure independent sampling.
 
 \vspace{1em}
 \textit{In the following sections, we focus on $10 \times 10$ lattices}
@@ -685,6 +685,9 @@ Several directions for future work merit attention.
 The present analysis is restricted to incoherent (diagonal) initial
 states; extending the algorithm to coherent superpositions may
 further amplify the effect by exploiting off-diagonal interference.
+Likewise, incorporating site-resolved photon losses (beyond the
+uniform attenuation that factors out of the normalized dynamics)
+would bring the model closer to realistic photonic hardware.
 Scaling the approach to larger networks ($n \gg 10$) will require
 efficient spectral methods or variational approximations, since, for a
 graph of $N$ nodes, the Liouvillian acts on the $N^2$-dimensional space
