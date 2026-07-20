@@ -426,32 +426,33 @@ We confirmed the presence of a similar effect for different dimensions of the sq
 
 We consider the Inverse Participation Ratio (IPR) parameter \cite{farkas},
 which characterizes the degree of spatial localization of the eigenvectors. In the mode matrix $\operatorname{Mat}(v_k)$, we retain only the diagonal components, as we are concerned solely with populations.
+Within (nearly) degenerate multiplets individual eigenvectors are defined only up to a basis rotation, so all localization measures below are evaluated for the distinct relaxation-rate groups $k'$ introduced in Sec.~7.2: the diagonal weight of a group is computed from an orthonormal basis $\{q_k\}$ of the span of its eigenvectors, $d_i = \sum_k |(\operatorname{Mat} q_k)_{ii}|^2$, a quantity invariant under intra-group basis rotations that reduces to $|(\operatorname{Mat} v_k)_{ii}|^2$ for a non-degenerate mode.
 We then calculate:
 \begin{equation}
 IPR(k)=\frac{\sum_{i=1}^N |\rho_{k_{ii}}|^4}{(\sum_{i=1}^N |\rho_{k_{ii}}|^2)^2}
 \label{eq:IPR}
 \end{equation}
-Here, the denominator serves as a normalization factor, ensuring that the IPR value ranges from $1/N$ (for a mode whose diagonal weight is uniformly distributed across all sites) to $1$ (for a mode whose diagonal weight is concentrated at a single site). Consequently, a decrease in this parameter corresponds to a greater delocalization of the mode. To quantitatively trace the structural evolution of the states, we plot the average IPR for the first three non-trivial modes as a function of the rewiring probability $p$, as shown in Fig.~\ref{fig:ipr_graphs}.
+Here, the denominator serves as a normalization factor, ensuring that the IPR value ranges from $1/N$ (for a mode whose diagonal weight is uniformly distributed across all sites) to $1$ (for a mode whose diagonal weight is concentrated at a single site). Consequently, a decrease in this parameter corresponds to a greater delocalization of the mode. To quantitatively trace the structural evolution of the states, we plot the average IPR for the three slowest distinct relaxation-rate groups as a function of the rewiring probability $p$, as shown in Fig.~\ref{fig:ipr_graphs}.
 
 \begin{figure}[H]
 \centerline{
 \begin{subfigure}{0.32\linewidth}
-    \includegraphics[width=1\linewidth]{figures/10x10_IPR_graph_mode_k_1}
-    \caption{localization of $\lambda_1$ (IPR)}
+    \includegraphics[width=1\linewidth]{figures/10x10_IPR_group_k_1}
+    \caption{group $k'=1$}
 \end{subfigure}
 \begin{subfigure}{0.32\linewidth}
-    \includegraphics[width=1\linewidth]{figures/10x10_IPR_graph_mode_k_2}
-    \caption{localization of $\lambda_2$ (IPR)}
+    \includegraphics[width=1\linewidth]{figures/10x10_IPR_group_k_2}
+    \caption{group $k'=2$}
 \end{subfigure}
 \begin{subfigure}{0.32\linewidth}
-    \includegraphics[width=1\linewidth]{figures/10x10_IPR_graph_mode_k_3}
-    \caption{localization of $\lambda_3$ (IPR)}
+    \includegraphics[width=1\linewidth]{figures/10x10_IPR_group_k_3}
+    \caption{group $k'=3$}
 \end{subfigure}
 }
-\caption{Dependence of the IPR, defined in Eq.~(\ref{eq:IPR}), on the rewiring probability $p$ (log. scale) for the three slowest relaxation modes ($k=1, 2, 3$) in a $10 \times 10$ lattice. The plotted values represent statistical averages over generated network realizations, with error bars. Notice the stark contrast in both scale and qualitative behavior: while the first mode ($k=1$) exhibits a pronounced increase in localization within the crossover regime, the subsequent modes ($k=2, 3$) remain significantly more delocalized and follow a standard trend toward homogeneity.}
+\caption{Dependence of the IPR, defined in Eq.~(\ref{eq:IPR}) with the invariant group weight $d_i$, on the rewiring probability $p$ (log. scale) for the three slowest distinct relaxation-rate groups ($k'=1, 2, 3$) in a $10 \times 10$ lattice. Error bars: $\pm 1$ standard deviation over 30 network realizations. All three groups become more localized with increasing disorder; the leading group shows the strongest growth --- from $\mathrm{IPR} \approx 0.018$ (an extended state inherited from the lattice multiplets) to $\approx 0.22$ at $p=1$ --- while the subordinate groups localize more weakly.}
 \label{fig:ipr_graphs}
 \end{figure}
-It is worth noting the distinct behavior of the first mode and the scale of the axes in Fig.~\ref{fig:ipr_graphs}: the first mode becomes approximately three times more localized than the higher-order modes. We also observe a clear regime shift corresponding to the same small-world transition regions identified earlier.
+It is worth noting the distinct behavior of the leading group in Fig.~\ref{fig:ipr_graphs}: across the crossover region its IPR exceeds that of the subordinate groups by up to a factor of two, and the steep growth of its localization falls within the same small-world crossover region identified earlier.
 
 \subsection{Community Structure Analysis}
 We employ a more advanced method to analyze mode localization.
@@ -474,30 +475,30 @@ Overlap(k, C_m)=\frac{\sum_{i \in C_m}|Mat(v_k)_{ii}|^2}{TotalMass(k)} \ \ \in [
     \item If $\max(\operatorname{Overlap}(k)) \approx 1$, the mode is almost entirely contained within a single community. \textbf{It is structurally localized.}
     \item If $\max(\operatorname{Overlap}(k))$ is small (e.g., close to $1/M$, where $M$ is the number of communities), the mode is distributed across the entire network.
 \end{itemize}
-To observe the evolution of this structural localization, we calculate the maximum Overlap for the first three non-trivial modes across different rewiring probabilities $p$. The statistically averaged results are presented in Fig.~\ref{fig:community_overlap}.
+To observe the evolution of this structural localization, we calculate the maximum Overlap for the three slowest distinct relaxation-rate groups (using the invariant group weight $d_i$ in place of $|\operatorname{Mat}(v_k)_{ii}|^2$ for degenerate multiplets) across different rewiring probabilities $p$. The Louvain partitions are computed with a fixed random seed for reproducibility. The statistically averaged results are presented in Fig.~\ref{fig:community_overlap}.
 \begin{figure}[H]
 \centerline{
 \begin{subfigure}{0.32\linewidth}
-    \includegraphics[width=1\linewidth]{figures/10x10_community_analyse_mode_k_1_ENG}
-    \caption{localization of $\lambda_1$}
+    \includegraphics[width=1\linewidth]{figures/10x10_overlap_group_k_1}
+    \caption{group $k'=1$}
 \end{subfigure}
 \begin{subfigure}{0.32\linewidth}
-    \includegraphics[width=1\linewidth]{figures/10x10_community_analyse_mode_k_2_ENG}
-    \caption{localization of $\lambda_2$}
+    \includegraphics[width=1\linewidth]{figures/10x10_overlap_group_k_2}
+    \caption{group $k'=2$}
 \end{subfigure}
 \begin{subfigure}{0.32\linewidth}
-    \includegraphics[width=1\linewidth]{figures/10x10_community_analyse_mode_k_3_ENG}
-    \caption{localization of $\lambda_3$}
+    \includegraphics[width=1\linewidth]{figures/10x10_overlap_group_k_3}
+    \caption{group $k'=3$}
 \end{subfigure}
 }
-\caption{Dependence of the maximum community Overlap coefficient, defined in Eq.~(\ref{eq:over_lap}), on the rewiring probability $p$ for the three slowest modes ($k=1, 2, 3$) in a $10 \times 10$ lattice. Values are averaged over multiple graph realizations, with error bars indicating the standard deviation. While higher-order modes ($k=2, 3$) exhibit a transient increase in overlap during the small-world crossover before eventually delocalizing, the first mode ($k=1$) shows a monotonic increase, highlighting its structural confinement within specific topological communities.}
+\caption{Dependence of the maximum community Overlap coefficient, defined in Eq.~(\ref{eq:over_lap}), on the rewiring probability $p$ for the three slowest distinct relaxation-rate groups ($k'=1, 2, 3$) in a $10 \times 10$ lattice. Error bars: $\pm 1$ standard deviation over 30 network realizations. The overlap of all three groups grows through the small-world crossover; the leading group ($k'=1$) reaches the highest confinement (${\approx}0.6$), highlighting its structural localization within specific topological communities.}
 \label{fig:community_overlap}
 \end{figure}
 
-As depicted in Fig.~\ref{fig:community_overlap}, for the regular lattice structure ($p \to 0$), the slow modes are distributed across several symmetry-related regions, and the community overlap is minimal. We anticipate that during the transition period, large clusters will form: the network locally "breaks down" and connects to distant nodes while retaining local density due to the initial lattice structure. Thus, \textbf{an increase in overlap is expected} during this crossover. Subsequently, as $p$ approaches $1$ and the network becomes nearly random (destroying distinct community structures), we \textbf{expect a decrease} in the overlap. This predicted non-monotonic behavior---a transient peak followed by a decline---is indeed precisely what is observed for modes \textbf{k=2 and k=3}.\
+As depicted in Fig.~\ref{fig:community_overlap}, for the regular lattice structure ($p \to 0$), the slow-mode groups are distributed across several symmetry-related regions, and the community overlap is small (${\approx}0.2$). During the crossover, the network locally "breaks down" and connects to distant nodes while retaining local density inherited from the lattice, and the overlap of all three groups grows. For the subordinate groups ($k'=2, 3$) the growth is moderate, and only the third group hints at a decline as $p \to 1$, within the realization scatter.\
 
-However, the first mode behaves \textbf{differently}, indicating the re-emergence of the previously observed \textbf{topology-induced slow-mode localization}.\\
-The overlap for the first mode grows monotonically and then reaches a plateau. Rather than being a strictly quantum anomaly, this behavior represents a fundamental feature of the Liouvillian dynamics in the present dephasing quantum-walk model, sharing deep structural similarities with the localization of slow relaxation modes (e.g., the Fiedler vector) in classical diffusion on heterogeneous networks. We observe that as $p$ increases, despite the general delocalizing trend of the small-world crossover, \textbf{topological traps and distinct hubs emerge}; the modes localized around these structures "ascend" and become the slowest decay channels of the system.
+The leading group, however, stands out, indicating the re-emergence of the previously observed \textbf{topology-induced slow-mode localization}.\\
+Its overlap grows monotonically and then reaches a plateau (${\approx}0.6$). Rather than being a strictly quantum anomaly, this behavior represents a fundamental feature of the Liouvillian dynamics in the present dephasing quantum-walk model, sharing deep structural similarities with the localization of slow relaxation modes (e.g., the Fiedler vector) in classical diffusion on heterogeneous networks. We observe that as $p$ increases, despite the general delocalizing trend of the small-world crossover, \textbf{topological traps and distinct hubs emerge}; the modes localized around these structures "ascend" and become the slowest decay channels of the system.
 
 The observed spatial localization of the slowest mode significantly affects the system's relaxation dynamics. According to the theory of the spectral Mpemba effect, a condition for accelerated relaxation is the ability to prepare an initial state that weakly excites (or "darkens") the slowest mode while strongly interacting with faster modes.\\
 

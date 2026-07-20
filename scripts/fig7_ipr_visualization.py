@@ -1,10 +1,11 @@
-"""Fig. 7 (ipr_graphs): mean IPR of the three slowest non-trivial modes vs rewiring
-probability p (log axis), with run-to-run error bars. Reads the precomputed
-rewiring_spectrum_data_*.npz. Only the plotting is styled; the IPR computation is
-unchanged (metrics.calculate_ipr with Fortran-order reshape).
+"""Fig. 7 (v2, referee fix CF-2): mean IPR of the three slowest DISTINCT relaxation-rate
+groups vs rewiring probability p (log axis), with run-to-run error bars (+-1 std).
+
+Reads precalc/fig78_groups.npz produced by reduce_sweep_groups.py from the corrected
+(rightmost-mode) sweep archive. Group IPR uses the basis-invariant diagonal weight of the
+group's right-eigenspace (see reduce_sweep_groups.py); for a non-degenerate group it reduces
+exactly to the legacy per-mode IPR (metrics.calculate_ipr, F-order reshape).
 """
-import glob
-import os
 from pathlib import Path
 
 import numpy as np
@@ -15,52 +16,36 @@ from _bootstrap import ensure_src_on_path
 
 ensure_src_on_path()
 
-from qdyn_research.metrics import calculate_ipr
-from qdyn_research.npz_io import parse_grouped_vectors
 from qdyn_research.plot_style import apply_style, save_pdf, WIDTH_THIRD, LINE_COLORS
 
 FIG_DIR = Path(__file__).resolve().parent.parent / "paper" / "figures"
 PRECALC = Path(__file__).resolve().parent / "precalc"
-
-
-def find_npz():
-    """Newest spectral archive in precalc/ or cwd (canonical: spectrum_sweep_10x10.npz)."""
-    pats = ["spectrum_sweep_*.npz", "rewiring_spectrum_data_*.npz"]
-    cands = [c for p in pats for c in glob.glob(str(PRECALC / p)) + glob.glob(p)]
-    if not cands:
-        raise FileNotFoundError("no spectral sweep npz in scripts/precalc or cwd")
-    return max(cands, key=os.path.getctime)
+CACHE = PRECALC / "fig78_groups.npz"
 
 
 def main():
     apply_style()
-    grouped = parse_grouped_vectors(find_npz())
-    p_values = sorted(grouped.keys())
-    p_pos = [p for p in p_values if p > 0]
+    z = np.load(CACHE)
+    p, ipr = z["p"], z["ipr"]            # ipr: (40, 30, 3)
 
-    n_sq = next(iter(grouped.values()))[0].shape[0]
-    sites = int(np.sqrt(n_sq))       # density-matrix dimension (100 for 10x10)
-    side = int(np.sqrt(sites))       # lattice side (10)
-
-    for mode, color in zip((1, 2, 3), LINE_COLORS):
-        avg, std = [], []
-        for p in p_pos:
-            iprs = [calculate_ipr(V[:, mode], sites, reshape_order="F") for V in grouped[p]]
-            avg.append(np.mean(iprs))
-            std.append(np.std(iprs))
+    for gi, color in zip(range(3), LINE_COLORS):
+        avg = np.nanmean(ipr[:, :, gi], axis=1)
+        std = np.nanstd(ipr[:, :, gi], axis=1)
 
         fig, ax = plt.subplots(figsize=(WIDTH_THIRD, WIDTH_THIRD * 0.95), layout="constrained")
-        ax.errorbar(p_pos, avg, yerr=std, fmt="-o", capsize=2, color=color, ecolor=color, alpha=0.9)
+        ax.errorbar(p, avg, yerr=std, fmt="-o", capsize=2, markersize=2.5,
+                    color=color, ecolor=color, alpha=0.9)
         ax.set_xscale("log")
         ax.set_xlabel("$p$")
-        ax.set_ylabel(rf"$\langle \mathrm{{IPR}}(\lambda_{mode}) \rangle$")
+        ax.set_ylabel(rf"$\langle \mathrm{{IPR}}(k'={gi+1}) \rangle$")
         # compact exponent ticks every 2 decades (decimal labels collide at 42 mm width)
         ax.set_xticks([1e-4, 1e-2, 1e0])
         ax.xaxis.set_major_formatter(LogFormatterMathtext())
         ax.grid(True, which="both", ls="--")
         ax.margins(x=0.05)
         FIG_DIR.mkdir(parents=True, exist_ok=True)
-        save_pdf(fig, str(FIG_DIR / f"{side}x{side}_IPR_graph_mode_k_{mode}.pdf"))
+        save_pdf(fig, str(FIG_DIR / f"10x10_IPR_group_k_{gi+1}.pdf"))
+    print("fig7 v2: 10x10_IPR_group_k_1..3 rebuilt")
 
 
 if __name__ == "__main__":
