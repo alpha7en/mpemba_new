@@ -51,8 +51,8 @@ python -m pip install -e .
 ## Quick check
 
 ```bash
-cd /Users/alpha7en/PycharmProjects/alod2/research_refactor
-python -m pytest -q
+python -m pytest -q            # fast smoke + artifact tests (~1 min)
+python -m pytest -q -m slow    # heavy verification (dense eig; ~2-4 min)
 ```
 
 ## Run heavy simulation stage
