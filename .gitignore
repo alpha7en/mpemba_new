@@ -11,6 +11,8 @@ __pycache__/
 scripts/precalc/*.pkl
 scripts/precalc/spectrum_sweep_*.npz
 scripts/precalc/rewiring_spectrum_data_*.npz
+scripts/precalc/sweep_rightmost_10x10.npz
+scripts/precalc/sweep_rightmost_parts/
 
 # Legacy pre-reformat figure exports (superseded by paper/figures/*.pdf; kept locally only)
 scripts/*.png

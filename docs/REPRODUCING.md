@@ -25,9 +25,9 @@ Each stochastic artifact in this repository is in one of two states:
 | Fig. 3 | `9states_modes_simulation_line_10x10_with_selection_ENG` | `fig3_relaxation_dynamics.py` | deterministic (ODE integration, γ=0.1); cache `fig3_dynamics.npz` |
 | Fig. 4 | `log10x10_p_L`, `..._SCALED` | `fig4_average_path_length.py` | ensemble statistics (1000 graphs/p, single-pass rewiring, L_avg on the largest connected component); cache `fig4_pathlength.npz`. Connectivity statistics backing the text: `check_connectivity_stats.py` (seed 1) |
 | Fig. 5 | `with_examples_1..3` | `fig5_topology_and_spectrum.py` | representative realizations stored in cache `fig5_spectra.npz` |
-| Fig. 6 | `mode_1..3_p_log_ENG`, `gap_p_log_ENG` | `fig6_lambda_visualization.py` | sweep archive (below) |
-| Fig. 7 | `10x10_IPR_graph_mode_k_1..3` | `fig7_ipr_visualization.py` | sweep archive (below) |
-| Fig. 8 | `10x10_community_analyse_mode_k_1..3_ENG` | `fig8_overlap.py` | sweep archive (below) |
+| Fig. 6 | `re1_p_log`, `oscfrac_p_log`, `im1_p_log`, `sep_p_log` | `fig6_lambda_visualization.py` | corrected rightmost-mode sweep (below); reduction cached in `fig6_rightmost.npz` (git) |
+| Fig. 7 | `10x10_IPR_group_k_1..3` | `fig7_ipr_visualization.py` | group reduction `fig78_groups.npz` (git), produced by `reduce_sweep_groups.py` from the corrected sweep |
+| Fig. 8 | `10x10_overlap_group_k_1..3` | `fig8_overlap.py` | same group reduction; Louvain seeded (random_state=42) |
 | Figs. 9–10 | `Task_B_..._part1/part2` | `fig9_task_b_heatmap.py` | representative 10×10 graph stored in cache `fig9_representative.npz` (incl. its `tau`); cacheless re-run is seeded (2026) but yields a different, reproducible representative |
 | Figs. 11–12 | `Step1_Three_Modes`, `final_hot_state`, `final_cold_state` | `fig11_algorithm_visual.py` | the paper 6×6 graph (below) |
 | Fig. 13 | `alg_compare` | `fig10_random_benchmark.py` | benchmark data `dirichlet_benchmark_30k.npz` (below) |
@@ -63,11 +63,19 @@ Headline numbers: t*_algo = 44.66, and 1.21 % of admissible pairs cross faster t
 engineered pair. Crossings beyond t ≈ 150–160 sit at the numerical noise floor of D(t)
 (~1e-13) and are not physically resolved (stated in the paper; the figure omits them).
 
-**`precalc/spectrum_sweep_10x10.npz`** (~670 MB, not in git) — the p-sweep spectral archive
-behind Figs. 6–8 (30 runs per p). Regenerate with `run_multicore_npz.py`: topologies are seeded
-per (p, run_idx) (`seed = run_idx`, see `qdyn_research/npz_io.py`), and each bundle stores the
-adjacency matrices as the direct source of truth. The figure scripts accept both this canonical
-name and freshly generated `rewiring_spectrum_data_*.npz` bundles (newest wins).
+**`precalc/sweep_rightmost_10x10.npz`** (~1.8 GB, not in git) — the CORRECTED p-sweep archive
+behind Figs. 6–8: for every graph the 10 rightmost (largest Re λ) modes found by the verified
+exp-transform solver (`spectral.analyze_liouvillian_modes_rightmost`; validation harness:
+`verify_rightmost_solver.py`, 61/61 dense-truth graphs + 4/4 10×10 spot checks), with per-mode
+residuals stored (worst 1.6e-12). Regenerate with `run_sweep_rightmost.py` (resumable,
+per-p checkpoints; topologies seeded per (p, run_idx) exactly as the legacy archive, so the
+graphs are identical). Small reductions used by the figures (`fig6_rightmost.npz`,
+`fig78_groups.npz`) are git-tracked, so the figures rebuild without the big archive.
+
+**`precalc/spectrum_sweep_10x10.npz`** (~670 MB, not in git) — the LEGACY sweep archive
+(shift-invert near σ=0, modes ordered by |λ|). Kept for provenance/comparison only: it
+misidentifies the slowest mode for p < 0.023 (see docs/revision_log.md, Block B1). Not used
+by any current figure. Regenerate with `run_multicore_npz.py`.
 
 ## Model conventions
 
