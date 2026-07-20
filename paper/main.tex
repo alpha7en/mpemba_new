@@ -181,10 +181,8 @@ where $I$ is the $N \times N$ identity matrix, and $L_D$ is a diagonal matrix wi
 Throughout the subsequent numerical analysis, we define the time scale in units of the inverse hopping rate, effectively setting \textbf{$J=\frac{1}{2}$} (all times below are quoted in these dimensionless units; in a waveguide implementation they correspond to propagation distance measured in units of the inverse coupling constant). The dephasing rate is fixed at \textbf{$\gamma=0.1$}. This specific ratio ($\gamma/J = 0.2$) places the system in a weakly dissipative regime where coherent dynamics remains appreciable on the relaxation time scale.
 
 
-\textbf{}
 \section{Eigenstate Decomposition}
-As established, the dynamics equation is written as $\frac{d\rho}{dt} = \mathcal{L}
-(\rho) = L\cdot \ketket{\rho}$.\\
+As established, the dynamics equation is written as $\frac{d}{dt}\ketket{\rho} = L \ketket{\rho}$.\\
 This implies that its solution can be represented as:
 \begin{equation}
 \ketket{\rho(t)}=e^{Lt}\cdot \ketket{\rho(0)}
@@ -192,8 +190,6 @@ This implies that its solution can be represented as:
 \end{equation}
 We analyze the system in the {non-Hermitian} diagonal basis of the operator $L$.\footnote{We assume that the Liouvillian superoperator $L$ is diagonalizable, which guarantees the existence of a complete biorthogonal basis of eigenmodes. While the non-Hermitian nature of $L$ allows for the existence of non-diagonalizable defective degeneracies (Exceptional Points), such points typically form a manifold of measure zero in the parameter space and are avoided in our generic parameter regime. Furthermore, the geometric symmetries of the square lattice induce standard (semi-simple) macroscopic degeneracies in the spectrum---such as the observed quadruplets of modes with identical complex decay rates---which our numerical solver naturally resolves by identifying a linearly independent basis spanning the degenerate subspaces.} This vectorization formalism allows for the spectral analysis of the Liouvillian superoperator.\cite{minganti2018}
 
-% \begin{otherlanguage}{russian}
-% \end{otherlanguage}
 To spectrally decompose the dynamics, we introduce a biorthogonal basis consisting of the right eigenvectors $v_k \ (\ketket{\rho_k})$ and the left eigenvectors $\langle\langle\sigma_k |$, which satisfy:
 \begin{equation}
 L\cdot v_k = \lambda_k \cdot v_k,
@@ -213,7 +209,7 @@ Substituting this decomposition into the dynamics formula yields:
 \label{eq:eig_decomp}
 \end{equation}
 
-{We uniquely identify the stationary state of the system corresponding to $\lambda_0=0$. The associated right eigenvector is the stationary density matrix $v_0 = \ketket{\rho^{(S)}}$, and the corresponding left eigenvector is the identity operator. Due to the trace-preserving nature of the Lindblad evolution, the coefficient for the stationary mode is strictly $c_0 = 1$. }
+{We uniquely identify the stationary state of the system corresponding to $\lambda_0=0$. The associated right eigenvector is the stationary density matrix $v_0 = \ketket{\rho^{(S)}}$, and the corresponding left eigenvector is the identity operator. Due to the trace-preserving nature of the Lindblad evolution, the coefficient for the stationary mode is strictly $c_0 = 1$, since $\langle\langle\sigma_0|\rho\rangle\rangle = \operatorname{Tr}\rho = 1$ both for the initial and for the stationary state. }
 
 
 Furthermore, $e^{\operatorname{Re}\lambda_k t}$ represents the dissipative exponent in the decomposition; thus, $\operatorname{Re}\lambda_k < 0$ for non-trivial modes, corresponding to the decay rate. The term $e^{i\operatorname{Im}\lambda_k t}$ corresponds to the oscillation frequency $\omega_k = \operatorname{Im}\lambda_k$. \cite{kessler2012, minganti2018}
@@ -254,7 +250,7 @@ The empirical candidate states for a square lattice are defined as follows:\\
     \item \textbf{Mixed (Diagonal):} An incoherent mixture of sites along the main diagonal, \textit{subspaces like $k'=2, 21$ in Fig.~\ref{fig:big_modes_map}.}
     \item \textbf{Pure (Coherent Diagonal):} A coherent superposition supported entirely on the geometric main diagonal: $|\psi\rangle = \frac{1}{\sqrt{|S|}}\sum_{j\in S}|j\rangle$ with $S = \{(i, j) : i = j\}$.
     \item \textbf{Mixed (Inner Corners):} A mixture of the four inner corners $\{(2, 2), (n-1, 2), (2, n-1), (n-1, n-1)\}$.
-    \item \textbf{Mixed (Top Edges):} A state distributed evenly along the top boundary edges. \textit{E.g. $k'=2,3,4,7$ in Fig.~\ref{fig:big_modes_map}}
+    \item \textbf{Mixed (Top/Bottom Edges):} A state distributed evenly along the top and bottom boundary rows. \textit{E.g. $k'=2,3,4,7$ in Fig.~\ref{fig:big_modes_map}}
     \item \textbf{Mixed (Checkerboard):} A macroscopic checkerboard pattern (e.g., only "even" nodes occupied), \textit{specifically designed to interact with high-frequency modes similar to $k'=26$ in Fig.~\ref{fig:big_modes_map}.}
     
 \end{enumerate}
@@ -272,8 +268,6 @@ Where: $ \ketket{\rho(0)}$ --- vectorized initial density matrix. $\ketket{\rho^
 
 In the right diagram (Fig.~\ref{fig:candidate_states}), we plot the percentage contribution of each degenerate multiplet $k'$ (the macro-groups introduced for Fig.~\ref{fig:big_modes_map}), $W_{k'} = \|\sum_{k \in k'} c_k \ketket{\rho_k}\|^2$, normalized over the non-stationary multiplets. Individual coefficients $c_k$ within a degenerate multiplet depend on the arbitrary basis choice made by the numerical eigensolver, whereas the norm of the projected component is basis-invariant. {The weights $W_{k'}$ do not possess a direct probabilistic interpretation. Instead, they serve as a relative geometric measure of how strongly a specific transient channel is excited by the initial configuration.}
 
-%\begin{otherlanguage}{russian}
-%\end{otherlanguage}
 
 
 We decompose each of the 8 candidate initial states into the lattice eigenbasis to quantify their mode content. The projection coefficients $W_k$ indicate how strongly a specific mode participates in the relaxation process of a given state. The results, summarized in Fig.~\ref{fig:candidate_states}, confirm that our empirically chosen states are indeed highly selective. \textcolor{green}{The bar charts reveal a striking sparsity: the incoherent mixtures couple to a small number of multiplets rather than smearing across the spectrum. This is a direct consequence of \textbf{symmetry selection rules}: because these states exhibit distinct spatial symmetries (e.g., the fully symmetric "Four Corners"), their overlaps vanish for eigenmodes of mismatched spatial parity. The coherent superposition (state 5), which also populates the off-diagonal coherence sectors, couples to a broader yet still structured set of multiplets.} This symmetry-driven selectivity is the fundamental prerequisite for observing the trajectory crossings characteristic of the Quantum Mpemba effect.
@@ -545,7 +539,7 @@ To visualize the spatial structure, we construct a local excitability map by cal
 \begin{figure}[H]
     \centerline{\includegraphics[width=\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part1}}
     \caption{Statistical distribution of the average shortest path length ($L_{avg}$) used to select a representative network topology at a fixed $p=0.15$. The horizontal axis represents the topological metric $L_{avg}$, the vertical axis displays the frequency of occurrences across an ensemble of randomly generated graph realizations (ensemble size $N = 2000$). The red dashed vertical line marks the median of the distribution. Selecting the network realization closest to this median ensures that the subsequent spatial excitability analysis (Fig.~\ref{fig:excib_maps_represent}) is performed on a typical architecture, thereby avoiding statistically anomalous configurations.}
-    \label{fig:placeholder}
+    \label{fig:lavg_selection}
 \end{figure}
 \begin{figure}[H]
     \centerline{\includegraphics[width=\linewidth]{figures/Task_B_Strict_Layout_Fixed_test_p_0_ENG15_edited_part2}}
