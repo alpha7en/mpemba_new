@@ -385,40 +385,39 @@ To establish a baseline for our spectral analysis, Fig.~\ref{fig:rewired_spectra
 \subsection{Analysis of Slow Modes}
 We observe that the first few modes, located closest to zero on the real axis, are the most indicative of the system's long-term dynamics. Note that while these are conventionally the "slowest" decaying modes, they determine the convergence speed. 
 
-To investigate the system's response to disorder, we track the behavior of the first three non-trivial modes (characterized by purely real eigenvalues, $\operatorname{Im} \lambda_k = 0$) across varying rewiring probabilities $p$. The eigenvalues are averaged over 30 independent graph realizations for each $p$. The dependence of the first mode's relaxation rate on $p$ is shown in Fig.~\ref{fig:modes_log_scale}(a).\
+To investigate the system's response to disorder, for every disorder realization we identify the slowest non-trivial mode $\lambda_1$ as the eigenvalue with the largest real part. Depending on the realization, this mode is either purely real or belongs to an oscillating complex-conjugate family ($\operatorname{Im}\lambda_1 \neq 0$) inherited from the degenerate multiplets of the regular lattice. All statistics are collected over 30 independent graph realizations for each $p$; the resulting relaxation rate is shown in Fig.~\ref{fig:modes_log_scale}(a).\
 
-For a more detailed analysis across multiple orders of magnitude of $p$, we present the behavior of all three slow modes, as well as the separation $\Delta$ between the two slowest modes, on a logarithmic scale in Fig.~\ref{fig:modes_log_scale}.
+For a detailed analysis across multiple orders of magnitude of $p$, Fig.~\ref{fig:modes_log_scale} presents the mean relaxation rate of the slowest mode, the fraction of realizations in which this mode oscillates, the oscillation frequency of that subensemble, and the separation $\Delta$ between the two slowest \emph{distinct} relaxation rates.
 
 \begin{figure}[H]
 \centering
 \begin{subfigure}{0.48\linewidth}
-    \includegraphics[width=1\linewidth]{figures/mode_1_p_log_ENG}
-    \caption{mode $\lambda_1$}
+    \includegraphics[width=1\linewidth]{figures/re1_p_log}
+    \caption{relaxation rate $\operatorname{Re}(\lambda_1)$}
 \end{subfigure}
 \begin{subfigure}{0.48\linewidth}
-    \includegraphics[width=1\linewidth]{figures/mode_2_p_log_ENG}
-    \caption{mode $\lambda_2$ }
+    \includegraphics[width=1\linewidth]{figures/oscfrac_p_log}
+    \caption{fraction of oscillating realizations}
 \end{subfigure}
 
 \vspace{1em}
 
 \begin{subfigure}{0.48\linewidth}
-    \includegraphics[width=1\linewidth]{figures/mode_3_p_log_ENG}
-    \caption{mode $\lambda_3$}
+    \includegraphics[width=1\linewidth]{figures/im1_p_log}
+    \caption{oscillation frequency $|\operatorname{Im}(\lambda_1)|$}
 \end{subfigure}
 \begin{subfigure}{0.48\linewidth}
-    \includegraphics[width=1\linewidth]{figures/gap_p_log_ENG}
-    \caption{slow-mode separation $\operatorname{Re}(\lambda_1-\lambda_2)$ }
+    \includegraphics[width=1\linewidth]{figures/sep_p_log}
+    \caption{slow-mode separation $\operatorname{Re}(\lambda_1-\lambda_2)$}
 \end{subfigure}
 
-\caption{Dependence of the relaxation rates on the rewiring probability $p$ (in log. scale) for a $10 \times 10$ lattice. Panels display the real parts of the eigenvalues $\operatorname{Re}(\lambda_k)$ for the three nontrivial slowest modes ($k=1, 2, 3$). Last panel illustrates the separation between the two slowest modes, $\Delta = \operatorname{Re}(\lambda_1) - \operatorname{Re}(\lambda_2)$; the conventional Liouvillian relaxation gap is $-\operatorname{Re}(\lambda_1)$, shown in panel (a).}
+\caption{Statistics of the slowest non-trivial Liouvillian mode versus the rewiring probability $p$ (log scale) for a $10 \times 10$ lattice; for each realization the mode is identified by the largest $\operatorname{Re}\,\lambda$. \textbf{(a)} Mean relaxation rate $\operatorname{Re}(\lambda_1)$; the conventional Liouvillian relaxation gap is $-\operatorname{Re}(\lambda_1)$. \textbf{(b)} Fraction of realizations whose slowest mode is oscillating ($\operatorname{Im}\lambda_1 \neq 0$): the oscillating family inherited from the regular lattice loses its dominance with disorder and disappears for $p \gtrsim 2\times10^{-2}$. \textbf{(c)} Mean oscillation frequency $|\operatorname{Im}(\lambda_1)|$ over the oscillating subensemble. \textbf{(d)} Separation between the two slowest \emph{distinct} relaxation rates, $\Delta = \operatorname{Re}(\lambda_1) - \operatorname{Re}(\lambda_2)$; differences between individual modes are ill-defined inside degenerate multiplets. Error bars: $\pm 1$ standard deviation over 30 realizations in (a), (c), (d); binomial standard error in (b).}
 \label{fig:modes_log_scale}
 \end{figure}
-We observe the following features, which are particularly evident in the first mode. The relaxation rate of the slowest mode remains approximately constant within statistical uncertainty up to $p \approx 0.005$. Beyond this threshold, $|\operatorname{Re}(\lambda_1)|$ decreases (i.e., the eigenvalue moves closer to zero on the negative real axis), corresponding to a \textbf{slowing down} of the first mode as the network approaches a random configuration. This may appear \textbf{counter-intuitive}, since, on average, a small-world network relaxes to equilibrium faster. However, individual configurations hosting significantly slower modes emerge with increasing probability, and it is this effect that we observe. 
-\textcolor{green}{Rather than constituting the Mpemba effect itself---which strictly refers to the anomalous crossing of relaxation trajectories for specific initial states---this spectral phenomenon represents a \textbf{topology-induced slow-mode localization}. By structurally isolating the slowest relaxation channels, this topological transition geometrically assists in the preparation of initial states that bypass these slow channels, thereby facilitating what we term the \textbf{topologically assisted Quantum Mpemba effect}.\\
-We also note that the error bars begin to increase sharply at the same threshold $p \approx 0.005$, indicating a change in the system's dynamical regime.}
+We observe the following. First, for $p \lesssim 2\times10^{-2}$ the slowest mode of a given realization is predominantly a member of the oscillating family inherited from the regular lattice ($|\operatorname{Im}\lambda_1| \approx 0.24$); disorder progressively suppresses this family, so the fraction of oscillating realizations drops below one half at $p \approx 4\times10^{-3}$ and vanishes for $p \gtrsim 2\times10^{-2}$ (panel~b). Second, the mean relaxation rate is \textbf{non-monotonic}: $|\operatorname{Re}(\lambda_1)|$ first grows with disorder --- a mild ensemble-averaged \emph{acceleration} of relaxation peaking at $p \approx 0.03$ --- and then decreases toward the random-graph limit, corresponding to a \textbf{slowing down} of the slowest mode. The latter trend may appear \textbf{counter-intuitive}, since, on average, a small-world network relaxes to equilibrium faster; however, individual configurations hosting significantly slower localized modes emerge with increasing probability and dominate the ensemble average, which is accompanied by the sharp growth of the realization-to-realization scatter visible in panel~(a).
+\textcolor{green}{Rather than constituting the Mpemba effect itself---which strictly refers to the anomalous crossing of relaxation trajectories for specific initial states---this spectral phenomenon represents a \textbf{topology-induced slow-mode localization}. By structurally isolating the slowest relaxation channels, this topological transition geometrically assists in the preparation of initial states that bypass these slow channels, thereby facilitating what we term the \textbf{topologically assisted Quantum Mpemba effect}.}
 
-We confirmed the presence of a similar effect for different dimensions of the square lattice. (supplemental)
+We confirmed the presence of a similar effect for different dimensions of the square lattice (not shown).
 
 
 
