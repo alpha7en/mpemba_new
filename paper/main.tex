@@ -171,7 +171,7 @@ Here, the second term is the negative von Neumann entropy of the state~\cite{neu
 \subsection{Liouvillian Vectorization}
 To solve Eq.~(\ref{eq:lindblad_elements}) and analyze the system's spectrum, we transition to the Liouville superoperator formalism~\cite{gyamfi2020}. The density matrix is mapped to a column vector via the vectorization operation $\operatorname{vec}(\cdot)$, denoted in double-ket notation as $\ketket{\rho} \equiv \operatorname{vec}(\rho) = [\rho_{1,1}, \rho_{2,1}, \dots, \rho_{N,N}]^\top$. \textcolor{green}{We further define the inverse operator $\operatorname{Mat} \equiv \operatorname{vec}^{-1}$, which restores an $N \times N$ matrix from its vectorized form.} The Liouville space is equipped with the Hilbert-Schmidt inner product $\langle\langle A | B \rangle\rangle = \operatorname{Tr}(A^\dagger B)$.
 
-The master equation transforms into a matrix differential equation $\frac{d}{dt}\ketket{\rho} = L\ketket{\rho}$, where the matrix representation $L$ of the Liouvillian superoperator $\mathcal{L}$ \textcolor{magenta}{(Liouvillian is non-normal?$\mathcal{L}\mathcal{L}^{\dagger}\ne\mathcal{L}^{\dagger}\mathcal{L}$)} has dimensions $N^2 \times N^2$ and can be explicitly constructed by using the Kronecker product ($\otimes$). Separating the coherent and dissipative parts, we obtain the target matrix:
+The master equation transforms into a matrix differential equation $\frac{d}{dt}\ketket{\rho} = L\ketket{\rho}$, where the matrix representation $L$ of the Liouvillian superoperator $\mathcal{L}$ is generally non-normal, $LL^{\dagger}\ne L^{\dagger}L$, and has dimensions $N^2 \times N^2$. It can be explicitly constructed by using the Kronecker product ($\otimes$). Separating the coherent and dissipative parts, we obtain the target matrix:
 \begin{equation}
 L = iJ(I \otimes \tau - \tau \otimes I) + L_D,
 \label{eq:L}
@@ -198,7 +198,7 @@ L\cdot v_k = \lambda_k \cdot v_k,
 \label{eq:eig_1}
 \end{equation}
 
-\textcolor{green}{where $\mathcal{N}_k$ is a complex normalization constant. While analytical treatments often set $\mathcal{N}_k = 1$, standard numerical eigensolvers normalize left and right eigenvectors independently. Therefore, we explicitly retain the factor $\mathcal{N}_k = \langle\langle\sigma_k | \rho_k\rangle\rangle$ in all subsequent projections.}
+\textcolor{green}{Throughout, the right eigenvectors are normalized as $\lVert v_k\rVert_2=1$. The quantity $\mathcal{N}_k$ is a complex normalization constant. While analytical treatments often set $\mathcal{N}_k = 1$, standard numerical eigensolvers normalize left and right eigenvectors independently. Therefore, we explicitly retain the factor $\mathcal{N}_k = \langle\langle\sigma_k | \rho_k\rangle\rangle$ in all subsequent projections.}
 \begin{equation}
 \ketket{\rho(0)}=\sum_k c_k v_k
 \label{eq:eig_decomp_0}
@@ -507,10 +507,10 @@ Since we work with the system's initial states, we select the class of fully \te
 \\
 We then define \textbf{local excitability} $B(k, i)$ for a specific node $i$:
 \begin{equation}
-    B(k, i) \equiv W_k\left(\text{for } |\rho_i(0)\rangle\rangle\right) = \left| \frac{\langle\langle\sigma_k | \rho_i(0) - \rho^{(S)}\rangle\rangle}{\langle\langle\sigma_k | \rho_k\rangle\rangle} \right|^2
+    B(k, i) \equiv \lVert c_k(\rho_i)v_k\rVert_2^2 = |c_k(\rho_i)|^2 = \left| \frac{\langle\langle\sigma_k | \rho_i(0) - \rho^{(S)}\rangle\rangle}{\langle\langle\sigma_k | \rho_k\rangle\rangle} \right|^2
     \label{local_excitability}
 \end{equation}
-based on Eq. (\ref{eq:c_k}).\\
+for an isolated non-degenerate mode, based on Eq. (\ref{eq:c_k}); the second equality follows from $\lVert v_k\rVert_2=1$.\\
 Since for $k > 0$ the left eigenvector $\langle\langle\sigma_k|$ is orthogonal to the right stationary state eigenvector $\ketket{\rho^{(S)}}$ (i.e., $\langle\langle\sigma_k|\rho_0\rangle\rangle=0$), the formula for non-trivial modes simplifies to:
     \begin{equation}
     B(k, i) = \left| \frac{\langle\langle\sigma_k | \rho_i(0)\rangle\rangle}{\langle\langle\sigma_k | \rho_k\rangle\rangle} \right|^2, \quad \text{for } k > 0
