@@ -22,6 +22,9 @@ scripts/visualisation_plots_ENG_captions/
 # Session working files (reviewer-comment screenshots)
 paper/rev_*.png
 
+# Advisor-revision subproject workspace (private working notes, never committed)
+revision_workspace/
+
 # LaTeX build artifacts
 paper/*.aux
 paper/*.log
