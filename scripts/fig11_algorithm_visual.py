@@ -120,16 +120,24 @@ def main():
     # Brightness map B(k,i)=|<w_k|rho_i>/<w_k|v_k>|^2 for the slow mode k=1.
     maps = {k: calculate_excitability_map(left_vecs, right_vecs, k, N) for k in [1, 2, 3]}
     b_map_1 = maps[1]
+    vmax_global = max(maps[k].max() for k in [1, 2, 3])
 
-    fig1, axs1 = plt.subplots(1, 3, figsize=(WIDTH_FULL, WIDTH_FULL * 0.5), layout="constrained")
+    fig1, axs1 = plt.subplots(1, 3, figsize=(WIDTH_FULL, WIDTH_FULL * 0.46), layout="constrained")
+    nc = None
     for i, k in enumerate([1, 2, 3]):
-        nc = draw_base_graph(axs1[i], graph, pos, maps[k], scale_factor, title=f"$k={k}$")
-        cb = fig1.colorbar(nc, ax=axs1[i], orientation="horizontal", fraction=0.05, pad=0.03)
-        cb.ax.tick_params(labelsize=8)
-        if i == 1:
-            cb.set_label(r"local excitability $|c_k(\rho_i)|^2$", fontsize=8)
+        nc = draw_base_graph(axs1[i], graph, pos, maps[k], scale_factor, title=f"$k={k}$", vmax=vmax_global)
+        axs1[i].set_xlim(-0.6, WIDTH - 1 + 0.6)
+        axs1[i].set_ylim(-0.6, HEIGHT - 1 + 0.6)
+        axs1[i].set_title(f"$k={k}$", fontsize=10, pad=6)
+    cb = fig1.colorbar(nc, ax=axs1, orientation="horizontal", fraction=0.06, pad=0.04, aspect=40, shrink=0.6)
+    cb.set_ticks([0.00, 0.05, 0.10, 0.15])
+    cb.set_ticklabels(["0.00", "0.05", "0.10", "0.15"])
+    cb.ax.tick_params(labelsize=8)
+    cb.set_label(r"local excitability $B(k,i)$ (shared color scale)", fontsize=8)
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    save_pdf(fig1, str(FIG_DIR / "Step1_Three_Modes.pdf"))
+    fig1.savefig(str(FIG_DIR / "Step1_Three_Modes.pdf"), bbox_inches="tight")
+    fig1.savefig(str(FIG_DIR / "Step1_Three_Modes.png"), dpi=300, bbox_inches="tight")
+    plt.close(fig1)
 
     vec_hot, vec_cold, vec_cold_score, history = find_guaranteed_mpemba_dense(
         left_vecs,

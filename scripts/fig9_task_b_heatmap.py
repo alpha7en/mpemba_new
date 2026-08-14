@@ -84,24 +84,32 @@ def main():
     ax.grid(True, axis="y", alpha=0.4)
     save_pdf(fig1, str(FIG_DIR / f"{BASE}_part1.pdf"))
 
-    # --- part 2: excitability maps B(k,i) for k=1,2,3 ---
+    # --- part 2: excitability maps B(k,i) for k=1,2,3 with SHARED color scale ---
     graph = nx.from_numpy_array(rep_tau)
     pos = {i: (i % WIDTH, (HEIGHT - 1) - (i // WIDTH)) for i in range(N)}
-    fig2, axs = plt.subplots(1, 3, figsize=(w, w * 0.5), layout="constrained")
+    fig2, axs = plt.subplots(1, 3, figsize=(w, w * 0.46), layout="constrained")
+    vmax_global = float(maps.max())
+    nc = None
     for i, k in enumerate(MODES):
         # thin, de-emphasized edges on the dense 10x10 lattice: the accent is the node
         # excitability, so the graph structure should recede (not add visual noise).
         nx.draw_networkx_edges(graph, pos, ax=axs[i], edge_color="0.6", alpha=0.7, width=0.5)
         nc = nx.draw_networkx_nodes(graph, pos, ax=axs[i], node_color=maps[i], cmap=SEQ_CMAP,
-                                    vmin=0, vmax=maps[i].max(), node_size=42, edgecolors="black", linewidths=0.3)
-        axs[i].set_title(f"$k={k}$")
+                                    vmin=0, vmax=vmax_global, node_size=42, edgecolors="black", linewidths=0.3)
+        axs[i].set_xlim(-0.8, WIDTH - 1 + 0.8)
+        axs[i].set_ylim(-0.8, HEIGHT - 1 + 0.8)
+        axs[i].set_title(f"$k={k}$", fontsize=10, pad=6)
         axs[i].set_aspect("equal")
         axs[i].axis("off")
-        cb = fig2.colorbar(nc, ax=axs[i], orientation="horizontal", fraction=0.05, pad=0.02)
-        cb.ax.tick_params(labelsize=7)
-        if i == 1:
-            cb.set_label(r"local excitability $B(k,i)$", fontsize=8)
-    save_pdf(fig2, str(FIG_DIR / f"{BASE}_part2.pdf"))
+
+    cb = fig2.colorbar(nc, ax=axs, orientation="horizontal", fraction=0.06, pad=0.04, aspect=40, shrink=0.6)
+    cb.set_ticks([0.00, 0.01, 0.02, 0.03, 0.04])
+    cb.set_ticklabels(["0.00", "0.01", "0.02", "0.03", "0.04"])
+    cb.ax.tick_params(labelsize=7)
+    cb.set_label(r"local excitability $B(k,i)$ (shared color scale)", fontsize=8)
+    fig2.savefig(str(FIG_DIR / f"{BASE}_part2.pdf"), bbox_inches="tight")
+    fig2.savefig(str(FIG_DIR / f"{BASE}_part2.png"), dpi=300, bbox_inches="tight")
+    plt.close(fig2)
 
 
 if __name__ == "__main__":
