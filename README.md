@@ -48,8 +48,8 @@ The study investigates dissipative single-photon dynamics and anomalous relaxati
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/alpha7en/mpemba_new.git
-cd mpemba_new
+git clone https://github.com/alpha7en/mpemba_quantum_effect.git
+cd mpemba_quantum_effect
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
