@@ -74,7 +74,7 @@ graphs are identical). Small reductions used by the figures (`fig6_rightmost.npz
 
 **`precalc/spectrum_sweep_10x10.npz`** (~670 MB, not in git) — the LEGACY sweep archive
 (shift-invert near σ=0, modes ordered by |λ|). Kept for provenance/comparison only: it
-misidentifies the slowest mode for p < 0.023 (see docs/revision_log.md, Block B1). Not used
+misidentifies the slowest mode for p < 0.023. Not used
 by any current figure. Regenerate with `run_multicore_npz.py`.
 
 ## Model conventions
