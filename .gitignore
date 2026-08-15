@@ -24,16 +24,6 @@ dist/
 # Testing
 .pytest_cache/
 
-# Large precomputed datasets (regenerable via scripts, see docs/REPRODUCING.md)
-# Small canonical artifacts in scripts/precalc/ remain tracked in git.
-scripts/precalc/*.pkl
-scripts/precalc/spectrum_sweep_*.npz
-scripts/precalc/rewiring_spectrum_data_*.npz
-scripts/precalc/sweep_rightmost_10x10.npz
-scripts/precalc/sweep_rightmost_parts/
-scripts/res_gap/
-scripts/*.npz
-
 # Local image outputs
 *.png
 !paper/preview_p1.png
